@@ -1,6 +1,7 @@
 //class to hold each grid
 class Week {
     constructor(userData = null) {
+        /** @type{Map<string,User>} */
         this._users = new Map();
         if (userData != null) {
             for (const u in userData)
@@ -8,11 +9,15 @@ class Week {
         }
     }
 
+    getGridCount() {
+        return 0;
+    }
+
     addGrid(user, grid) {
         if (this._users.has(user))
-            this.users.addGrid(grid);
+            this._users.get(user).addGrid(grid);
         else
-            this._users.set(user, new User(u, grid));
+            this._users.set(user, new User(user, grid));
     }
 
     getWordleWeek() {
@@ -20,7 +25,11 @@ class Week {
             console.error("Unable to get week number if you have no weeks");
             return null
         }
-        return this._users.getWordleWeek();
+        for(const u of this._users.values())
+            return u.getWordleWeek();
+
+        console.error("no users to get wordle week from");
+        return -1;
     }
 
     /**

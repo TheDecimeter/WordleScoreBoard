@@ -7,11 +7,19 @@
  */
 class WeekManager {
 
+    /**
+     * 
+     * @param {string} data 
+     * @param {HTMLElement} display 
+     */
     constructor(data, display) {
-        this.weeks = new Map();
-        this.currentWeek = null;
-        this.at = null;
-        this.display = display;
+        /** @type {Map<number,Week>} */
+        this._weeks = new Map();
+
+        /** @type {Week} */
+        this._currentWeek = null;
+        
+        this._display = display;
         this._refreshBoard(data);
     }
 
@@ -31,20 +39,50 @@ class WeekManager {
     }
 
     /**
-     * temporarly add a new grid, and send to the server for an update
-     * @param {string} user use name
-     * @param {string} newGrid grid info
+     * add a new grid, and send to the server for an update
+     * @param {string} userFieldId the id of the text area which contains the user id
+     * @param {string} gridFieldId the id of the text area which contains the grid
+     * @param {()=>void} onComplete the id of the text area which contains the user id
      */
-    addGrid(user, newGrid) {
+    addGrid(userFieldId, gridFieldId, onComplete) {
         //if week exists, add grid to week, otherwise, make a new week
-        const weekNum = week.getWordleWeek();
-        this.weeks.set(weekNum, week);
-        if (weekNum == this.currentWeek)
-            this.drawGrid(this.at);
+
+        // const weekNum = Week.getWordleWeek();
+        // this._weeks.set(weekNum, week);
+        // if (weekNum == this._currentWeek)
+        //     this.drawGrid(this._at);
+
     }
 
     drawGrid(at) {
         if (at == null)
             return;
+    }
+
+    /**
+     * add a new grid, and send to the server for an update
+     * @param {string} userFieldId the id of the text area which contains the user id
+     * @param {string} gridFieldId the id of the text area which contains the grid
+     */
+    _prepareGrid(userFieldId, gridFieldId) {
+        const user = /** @type{HTMLInputElement} */ ($(userFieldId)).value
+        const grid = /** @type{HTMLInputElement} */ ($(gridFieldId)).value
+        if (user.length > 0)
+            localStorage.setItem('WeekManager_UN', user);
+
+        const count = this._currentWeek == null ? 0 : this._currentWeek.getGridCount(); //TODO, plus 1?
+
+        const day = Grid.PARSE_DAY(grid);
+        const week = Grid.WORDLE_WEEK(day);
+
+        let form = new FormData();
+
+        form.append("user", encode(user));
+        form.append("grid", atob(grid));
+        form.append("day", day.toString());
+        form.append("week", week.toString());
+        form.append("count", count.toString());
+
+        return form;
     }
 }

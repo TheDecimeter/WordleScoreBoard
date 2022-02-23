@@ -1,4 +1,76 @@
 <?php
+
+function getWeek(string $week, int $count)
+{
+    $path = "grids/$week";
+    $r = new \stdClass();
+    $r->msg = [];
+    $r->to = "client";
+    if (!file_exists($path) || countFiles($path) == $count)
+        return $r;
+
+    $it = new \FilesystemIterator($path, FilesystemIterator::SKIP_DOTS);
+    foreach ($it as $day)
+        array_push($r->msg, getDay($week, $day->getFilename));
+    return $r;
+}
+
+function getDay(string $week, string $day)
+{
+    $r = new \stdClass();
+    $r->$day = [];
+    $path = "grids/$week/$day";
+    $it = new \FilesystemIterator($path);
+    foreach ($it as $file) {
+        $f = $file->openFile("r");
+        if (!$f) {
+            continue;
+        }
+
+        if ($f->flock(LOCK_SH)) {
+            $user = $file->getFilename();
+            $g = new \stdClass();
+            $g->$user = $f->fread($file->getSize());
+            array_push($r->users, $g);
+            $f = null;
+        }
+    }
+    return $r;
+}
+
+function getRecentWeek()
+{
+    $r = -1;
+    $it = new \FilesystemIterator("grids/", FilesystemIterator::SKIP_DOTS);
+    foreach ($it as $week) {
+        $val = intval($it->getFilename());
+        if ($val > $r)
+            $r = $val;
+    }
+    if ($r == -1)
+        return null;
+    return strVal($r);
+}
+
+function getWeekBefore(string $fromWeek)
+{
+    $fromVal = intval($fromWeek);
+    $r = strval($fromVal - 1);
+    if (file_exists("grids/$r"))
+        return $r;
+
+    $r = -1;
+    $it = new \FilesystemIterator("grids/", FilesystemIterator::SKIP_DOTS);
+    foreach ($it as $week) {
+        $val = intval($it->getFilename());
+        if ($val < $fromVal && $val > $r)
+            $r = $val;
+    }
+    if ($r == -1)
+        return null;
+    return strVal($r);
+}
+
 function getData()
 {
     //go through all files and put contents of each file into an array (explode name for name of array)
@@ -32,6 +104,93 @@ function getData()
     $r->msg = $grids;
     return $r;
 }
+
+function errCheck()
+{
+    $user = $_POST["user"];
+    $grid = $_POST["grid"];
+
+    if ($user == "") {
+        $r = new \stdClass();
+        $r->fail = true;
+        $r->msg = "User name required";
+        $r->to = "client";
+        return $r;
+    }
+    if ($grid == "") {
+        $r = new \stdClass();
+        $r->fail = true;
+        $r->msg = "grid required";
+        $r->to = "client";
+        return $r;
+    }
+    return null;
+}
+
+function countFiles(string $path)
+{
+    $size = 0;
+    $ignore = array('.', '..');
+    $files = scandir($path);
+    foreach ($files as $t) {
+        if (in_array($t, $ignore)) continue;
+        if (is_dir(rtrim($path, '/') . '/' . $t)) {
+            $size += countFiles(rtrim($path, '/') . '/' . $t);
+        } else {
+            $size++;
+        }
+    }
+    return $size;
+}
+
+function saveGrid()
+{
+    $err = errCheck();
+    if ($err != null)
+        return $err;
+
+    $day = $_POST["day"];
+    $week = $_POST["week"];
+    $user = $_POST["user"];
+    $grid = $_POST["grid"];
+    $count = $_POST["count"];
+
+    if (!file_exists(("grids/$week/$day")))
+        mkdir("grids/$week/$day", 0777, true);
+
+    $name = "grids/$week/$day/$user";
+    if (file_exists($name)) {
+        err("on $day from " . $_SERVER['REMOTE_ADDR'] . " grid change was attempted for $user");
+        $r = new \stdClass();
+        $r->fail = true;
+        $r->msg = "grid for today was already saved";
+        $r->to = "client";
+        return $r;
+    }
+
+    $f = fopen($name, "w");
+    if (!$f) {
+        $r = new \stdClass();
+        $r->fail = true;
+        $r->msg = "failed to open file to save grid";
+        $r->to = "client";
+        return $r;
+    }
+    if (flock($f, LOCK_EX)) {
+        fwrite($f, $grid);
+        fclose($f);
+        $r = new \stdClass();
+        $r->to = "client";
+        $r->msg = getWeek($week, $count);
+        return $r;
+    }
+    $r = new \stdClass();
+    $r->fail = true;
+    $r->msg = "failed to achieve lock on file to save grid";
+    $r->to = "client";
+    return $r;
+}
+
 function setData()
 {
     $day = $_POST["date"];
