@@ -1,21 +1,54 @@
 <?php
+function getNextWeek()
+{
+    $week = getWeekAfter($_POST["week"]);
+    $count = 0;
+    if (isset($_POST["count"])) {
+        if ($week == intval($_POST["nweek"])) {
+            $count = $_POST["count"];
+        }
 
-function getWeek(string $week, int $count)
+    }
+    $r = new \stdClass();
+    $r->to = "client";
+    $r->msg = getWeek($week, $count);
+    return $r;
+}
+function getPrevWeek()
+{
+    $week = getWeekBefore($_POST["week"]);
+    $count = 0;
+    if (isset($_POST["count"])) {
+        if ($week == intval($_POST["nweek"])) {
+            $count = $_POST["count"];
+        }
+
+    }
+    $r = new \stdClass();
+    $r->to = "client";
+    $r->msg = getWeek($week, $count);
+    return $r;
+}
+function getWeek($week, $count)
 {
     $path = "grids/$week";
     $r = new \stdClass();
     $r->msg = [];
+    $r->count = countFiles($path);
     $r->to = "client";
-    if (!file_exists($path) || countFiles($path) == $count)
+    if ($week == null || !file_exists($path) || countFiles($path) == intval($count)) {
         return $r;
+    }
 
     $it = new \FilesystemIterator($path, FilesystemIterator::SKIP_DOTS);
-    foreach ($it as $day)
-        array_push($r->msg, getDay($week, $day->getFilename));
+    foreach ($it as $day) {
+        array_push($r->msg, getDay($week, $day->getFilename()));
+    }
+
     return $r;
 }
 
-function getDay(string $week, string $day)
+function getDay($week, $day)
 {
     $r = new \stdClass();
     $r->$day = [];
@@ -31,7 +64,7 @@ function getDay(string $week, string $day)
             $user = $file->getFilename();
             $g = new \stdClass();
             $g->$user = $f->fread($file->getSize());
-            array_push($r->users, $g);
+            array_push($r->$day, $g);
             $f = null;
         }
     }
@@ -44,30 +77,63 @@ function getRecentWeek()
     $it = new \FilesystemIterator("grids/", FilesystemIterator::SKIP_DOTS);
     foreach ($it as $week) {
         $val = intval($it->getFilename());
-        if ($val > $r)
+        if ($val > $r) {
             $r = $val;
+        }
+
     }
-    if ($r == -1)
+    if ($r == -1) {
         return null;
+    }
+
     return strVal($r);
 }
 
-function getWeekBefore(string $fromWeek)
+function getWeekBefore($fromWeek)
 {
     $fromVal = intval($fromWeek);
     $r = strval($fromVal - 1);
-    if (file_exists("grids/$r"))
+    if (file_exists("grids/$r")) {
         return $r;
+    }
 
     $r = -1;
     $it = new \FilesystemIterator("grids/", FilesystemIterator::SKIP_DOTS);
     foreach ($it as $week) {
         $val = intval($it->getFilename());
-        if ($val < $fromVal && $val > $r)
+        if ($val < $fromVal && $val > $r) {
             $r = $val;
+        }
+
     }
-    if ($r == -1)
+    if ($r == -1) {
         return null;
+    }
+
+    return strVal($r);
+}
+
+function getWeekAfter($fromWeek)
+{
+    $fromVal = intval($fromWeek);
+    $r = strval($fromVal + 1);
+    if (file_exists("grids/$r")) {
+        return $r;
+    }
+
+    $r = PHP_INT_MAX;
+    $it = new \FilesystemIterator("grids/", FilesystemIterator::SKIP_DOTS);
+    foreach ($it as $week) {
+        $val = intval($it->getFilename());
+        if ($val > $fromVal && $val < $r) {
+            $r = $val;
+        }
+
+    }
+    if ($r == PHP_INT_MAX) {
+        return null;
+    }
+
     return strVal($r);
 }
 
@@ -127,13 +193,16 @@ function errCheck()
     return null;
 }
 
-function countFiles(string $path)
+function countFiles($path)
 {
     $size = 0;
     $ignore = array('.', '..');
     $files = scandir($path);
     foreach ($files as $t) {
-        if (in_array($t, $ignore)) continue;
+        if (in_array($t, $ignore)) {
+            continue;
+        }
+
         if (is_dir(rtrim($path, '/') . '/' . $t)) {
             $size += countFiles(rtrim($path, '/') . '/' . $t);
         } else {
@@ -146,8 +215,9 @@ function countFiles(string $path)
 function saveGrid()
 {
     $err = errCheck();
-    if ($err != null)
+    if ($err != null) {
         return $err;
+    }
 
     $day = $_POST["day"];
     $week = $_POST["week"];
@@ -155,8 +225,9 @@ function saveGrid()
     $grid = $_POST["grid"];
     $count = $_POST["count"];
 
-    if (!file_exists(("grids/$week/$day")))
+    if (!file_exists(("grids/$week/$day"))) {
         mkdir("grids/$week/$day", 0777, true);
+    }
 
     $name = "grids/$week/$day/$user";
     if (file_exists($name)) {
@@ -232,7 +303,6 @@ function setData()
         $r->to = "client";
         return $r;
     }
-
 
     $f = fopen($name, "w");
     if (!$f) {

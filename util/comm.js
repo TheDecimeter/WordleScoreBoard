@@ -13,13 +13,15 @@ class CommResponse {
      * @param {String | CommResponse} obj - the response object, either a CommResponse or a JSON string
      */
     constructor(obj) {
-        if (obj.msgs !== undefined && obj.code !== undefined) {
-            this.msgs = obj.msgs;
-            this.code = obj.code;
+        const o = /** @type {String & CommResponse} */(obj);
+        if (o.msgs !== undefined && o.code !== undefined) {
+            this.msgs = o.msgs;
+            this.code = o.code;
             return;
         }
         try {
-            let t = JSON.parse(obj);
+            /** @type {{fail?:boolean, msgs:any[]}}*/
+            let t  = JSON.parse(o);
             if (t.fail === undefined || !t.fail) {
                 if (t.msgs !== undefined && Array.isArray(t.msgs)) {
                     for (let m of t.msgs)
@@ -83,7 +85,7 @@ class Comm {
             }
         }
         if (index != -1)
-            Comm._updateCallbacksSuccess.splice(i, 1)
+            Comm._updateCallbacksSuccess.splice(index, 1)
     }
 
     static _callback(commResponse, callbacks) {
