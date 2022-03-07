@@ -95,7 +95,7 @@
         <br><br><br>
     </div>
 
-    <input type="file" id="file-selector" multiple>
+    <!-- <input type="file" id="file-selector" multiple> -->
 <script>
   const fileSelector = document.getElementById('file-selector');
   fileSelector.addEventListener('change', (event) => {
