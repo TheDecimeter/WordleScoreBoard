@@ -14,8 +14,12 @@ class User {
         else
             this._grids.push(new Grid(grids));
 
-        this._user = User.NORMALIZE_NAME(User.DECODE(user));
+        this._user = User.UNIFORM(name);
         this._grids.sort((a, b) => a._wordleDate.getTime() - b._wordleDate.getTime());
+    }
+
+    static UNIFORM(name){
+        return User.NORMALIZE_NAME(User.DECODE(name));
     }
 
     static NORMALIZE_NAME(n) {
