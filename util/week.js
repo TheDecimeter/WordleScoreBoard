@@ -40,6 +40,7 @@ class Week {
     }
 
     addGrid(user, grid) {
+        user = User.UNIFORM(user);
         if (this._users.has(user))
             this._users.get(user).addGrid(grid);
         else {
