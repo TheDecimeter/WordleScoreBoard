@@ -40,14 +40,13 @@ class Week {
     }
 
     addGrid(user, grid) {
-        user = User.UNIFORM(user);
-        if (this._users.has(user))
-            this._users.get(user).addGrid(grid);
+        const u = new User(user, grid)
+        if (this._users.has(u.user()))
+            this._users.get(u.user()).addGrid(grid);
         else {
-            const u = new User(user, grid)
             this._users.set(u.user(), u);
         }
-        return this._users.get(user);
+        return this._users.get(u.user());
     }
 
     averageScore() {
