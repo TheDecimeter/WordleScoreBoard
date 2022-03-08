@@ -28,7 +28,8 @@ class Week {
         }
 
         for (const user of grids) {
-            this._users.set(user[0], new User(user[0], user[1]));
+            const u = new User(user[0], user[1]);
+            this._users.set(u.user(), u);
         }
     }
 
