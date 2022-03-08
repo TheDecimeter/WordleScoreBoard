@@ -14,7 +14,7 @@ class User {
         else
             this._grids.push(new Grid(grids));
 
-        this._user = User.UNIFORM(name);
+        this._user = User.UNIFORM(user);
         this._grids.sort((a, b) => a._wordleDate.getTime() - b._wordleDate.getTime());
     }
 
