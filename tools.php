@@ -221,7 +221,7 @@ function saveGrid()
 
     $day = $_POST["day"];
     $week = $_POST["week"];
-    $user = $_POST["user"];
+    $user = strtolower($_POST["user"]);
     $grid = $_POST["grid"];
     $count = $_POST["count"];
 

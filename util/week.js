@@ -2,7 +2,6 @@
 class Week {
     constructor(days = null) {
         //user data is a list of days, each data has users keyed to grids
-        console.log("adding week " + JSON.stringify(days));
 
         /** @type{Map<string,User>} */
         this._users = new Map();
@@ -28,11 +27,9 @@ class Week {
             }
         }
 
-        for (let user of grids) {
+        for (const user of grids) {
             this._users.set(user[0], new User(user[0], user[1]));
         }
-        console.log("week saved")
-        console.log(this._users);
     }
 
     getGridCount() {

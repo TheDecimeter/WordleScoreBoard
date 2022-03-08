@@ -14,8 +14,29 @@ class User {
         else
             this._grids.push(new Grid(grids));
 
-        this._user = User.DECODE(user);
+        this._user = User.NORMALIZE_NAME(User.DECODE(user));
         this._grids.sort((a, b) => a._wordleDate.getTime() - b._wordleDate.getTime());
+    }
+
+    static NORMALIZE_NAME(n) {
+        if (n.length == 0)
+            return "";
+        n = n.toLowerCase();
+        if (n == "machine") {
+            return "<span style='color:darkgray;'><i>MACHINE</i></span>";
+        }
+        let nt = n.split(" ");
+
+        let r = "";
+        for (let nn of nt) {
+            if (nn.length == 0)
+                continue;
+            r += nn.charAt(0).toUpperCase();
+            if (nn.length > 1)
+                r += nn.substring(1, nn.length);
+            r += " ";
+        }
+        return "<b>" + r + "</b>";
     }
 
     addGrid(grid) {
@@ -65,7 +86,7 @@ class User {
             score = averageScore;
             prefix = "Game Average"
         }
-        return "<span class = 'missedTxt'>"+prefix + "</span><BR>" + Grid.DRAW_EMPTY(score, ["\t"]).replaceAll("\t", "<span class = 'boxM'></span>");
+        return "<span class = 'missedTxt'>" + prefix + "</span><BR>" + Grid.DRAW_EMPTY(score, ["\t"]).replaceAll("\t", "<span class = 'boxM'></span>");
     }
     drawFinal(averageScore, days) {
         return Grid.DRAW_EMPTY(this.score(averageScore, days), ["\t"]).replaceAll("\t", "<span class = 'boxM'></span>");
