@@ -13,7 +13,7 @@ class Grid {
     }
 
     draw() {
-        let r = this._gridString.replaceAll("\n","<BR>");
+        let r = this._gridString.replaceAll("\n", "<BR>");
         r = r.replaceAll("🟨", "<span class = 'boxY'></span>");
         r = r.replaceAll("⬜", "<span class = 'boxW'></span>");
         r = r.replaceAll("🟩", "<span class = 'boxG'></span>");
@@ -69,7 +69,7 @@ class Grid {
     }
 
     static WORDLE_FROM_DATE() {
-        return 226 + ((this.TODAY().getTime() - this.START_DAY().getTime()) / 86400000);
+        return 226 + Math.round((this.TODAY().getTime() - this.START_DAY().getTime()) / 86400000);
     }
 
     static WORDLE_WEEK(wordleDay = this.WORDLE_FROM_DATE()) {
