@@ -132,6 +132,7 @@ process(event);
         <?php
 // set array to data
 include_once "tools.php";
+
 $thisWeek = getRecentWeek();
 $weekData = getWeek($thisWeek, 0);
 echo "var thisWeek = " . json_encode($weekData) . ";\n";
@@ -148,7 +149,7 @@ if (count($weekData->msg) < 2) {
         console.log(thisWeek);
         console.log(lastWeek);
         // updateBoard(jsonData.msg);
-        ScoreBoard = new WeekManager(thisWeek, lastWeek,
+        ScoreBoard = new WeekManager(4, thisWeek, lastWeek,
          document.getElementById("table"),
          document.getElementById("weekDisplay"),
          document.getElementById("submitButton"),

@@ -3,27 +3,27 @@ class User {
     /**
      * 
      * @param {string} user username
-     * @param {string []} grids grid data for all of the user grids
+     * @param {{"grid":string, "day":string} []} grids grid data for all of the user grids
      */
     constructor(user, grids) {
         /** @type Grid[] */
         this._grids = [];
         if (Array.isArray(grids))
             for (const g of grids)
-                this._grids.push(new Grid(g));
-        else
-            this._grids.push(new Grid(grids));
+                this._grids.push(new Grid(g.grid, g.day));
+        // else
+        //     this._grids.push(new Grid(grids.grid, grids.day));
 
         this._user = User.UNIFORM(user);
         this._grids.sort((a, b) => a._wordleDate.getTime() - b._wordleDate.getTime());
     }
 
-    static UNIFORM(name){
-        return User.NORMALIZE_NAME(User.DECODE(name));
+    static UNIFORM(name) {
+        return User.NORMALIZE_NAME(User.DECODE(name).trim());
     }
 
     static NORMALIZE_NAME(n) {
-        if (n.length == 0)
+        if (n == null || n.length == 0)
             return "";
         n = n.toLowerCase();
         if (n == "machine") {
@@ -40,7 +40,7 @@ class User {
                 r += nn.substring(1, nn.length);
             r += " ";
         }
-        return "<b>" + r + "</b>";
+        return "<b>" + r.trim() + "</b>";
     }
 
     addGrid(grid) {
@@ -123,7 +123,16 @@ class User {
         if (weekFrom != null)
             dayAt = weekFrom - 1;
         let i = 0;
-        let grids = this._grids;
+        let unique = new Set();
+        let grids = this._grids.filter(g => {
+            if (unique.has(g._wordleDay)) {
+                console.log("filtering " + this._user + " " + g._wordleDay);
+                return false;
+            }
+            unique.add(g._wordleDay);
+            return true;
+        });
+
         return {
             length: grids.length,
             next: function () {
@@ -158,6 +167,7 @@ class User {
      * @returns 
      */
     static ENCODE(val) {
+        val = val.trim();
         let r = encodeURI(val).replaceAll("-", "%2d");
         r = r.replaceAll("=", "%3d");
         r = r.replaceAll("?", "%3f");

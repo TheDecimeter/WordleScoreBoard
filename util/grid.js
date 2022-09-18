@@ -3,9 +3,15 @@
 
 //class to handle a grid
 class Grid {
-    static SkipWords = ["Forgottle", "Missle"];
-    constructor(grid) {
-        this._gridString = grid;
+    static SkipWords = ["Turdle"];
+
+    /**
+     * 
+     * @param {string} grid 
+     * @param {string | number} day 
+     */
+    constructor(grid, day = null) {
+        this._gridString = Grid.FIX(grid, day);
         this._score = Grid.PARSE_SCORE(this._gridString);
         this._wordleDay = Grid.PARSE_DAY(this._gridString);
         this._wordleWeek = Grid.WORDLE_WEEK(this._wordleDay);
@@ -39,7 +45,16 @@ class Grid {
         return grid;
     }
 
+    /**
+     * 
+     * @param {string} grid 
+     * @returns 
+     */
     static PARSE_SCORE(grid) {
+        if (grid.includes("\n"))
+            grid = this.GET_STATS_LINE(grid);
+        if (grid == null)
+            return 0;
         const firstLine = grid.split("/")[0].split(" ");
         const num = firstLine[firstLine.length - 1];
         if (!num)
@@ -52,14 +67,19 @@ class Grid {
         return r;
     }
 
-    static PARSE_DAY(grid) {
+
+    static PARSE_DAY(grid, defaultDay = this.WORDLE_FROM_DATE()) {
+        if (grid.includes("\n"))
+            grid = this.GET_STATS_LINE(grid);
+        if (grid == null)
+            return defaultDay;
         const t = grid.split(" ");
         const day = t[1];
         if (!day)
-            return this.WORDLE_FROM_DATE();
+            return defaultDay;
         const r = parseInt(day);
         if (isNaN(r))
-            return this.WORDLE_FROM_DATE();
+            return defaultDay;
         return r;
     }
 
@@ -110,6 +130,53 @@ class Grid {
             case 11: return "DEC";
         }
         return "" + (parseInt(val) + 1);
+    }
+
+    static FILLER_WORD() {
+        return this.SkipWords[Math.floor(Math.random() * this.SkipWords.length)];
+    }
+
+    /**
+     * 
+     * @param {string} grid 
+     * @param {number | string} day 
+     * @returns the grid with a proper date and score header
+     */
+    static FIX(grid, day = null) {
+        let firstLine = this.GET_STATS_LINE(grid);
+        if (firstLine != null)
+            return grid;
+        if (day == null)
+            return this.FILLER_WORD() + " " + this.WORDLE_FROM_DATE() + " " + this.CALC_SCORE(grid) + "\n\n" + grid;
+        return this.FILLER_WORD() + " " + day + " " + this.CALC_SCORE(grid) + "\n\n" + grid;
+    }
+
+    static GET_STATS_LINE(grid) {
+        let g = grid.split("\n");
+        let score = 0;
+        for (const line of g) {
+            const l = line.trim();
+            if (this.PARSE_SCORE(l) != 0 &&
+                this.PARSE_DAY(l, null) != null)
+                return l;
+        }
+        return null;
+    }
+
+    static CALC_SCORE(grid) {
+        let g = grid.split("\n");
+        let score = 0;
+        for (const line of g) {
+            const l = line.trim();
+            if (l.startsWith("🟨") ||
+                l.startsWith("⬜") ||
+                l.startsWith("🟩") ||
+                l.startsWith("⬛"))
+                score++;
+        }
+        if (score == 0)
+            return "X/6";
+        return score + "/6";
     }
 
     /**

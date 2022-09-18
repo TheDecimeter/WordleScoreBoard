@@ -9,6 +9,7 @@ class WeekManager {
 
     /**
      * 
+     * @param {number} version the client version
      * @param {{msg:any}} laterWeekData data for the week furthest forward in time
      * @param {{msg:any}} earlierWeekData data for the week before the later week
      * @param {HTMLElement} display 
@@ -17,7 +18,8 @@ class WeekManager {
      * @param {HTMLButtonElement} prevButton submit button element
      * @param {HTMLButtonElement} nextButton submit button element
      */
-    constructor(laterWeekData, earlierWeekData, display, wordleDate, submitButton, prevButton, nextButton) {
+    constructor(version, laterWeekData, earlierWeekData, display, wordleDate, submitButton, prevButton, nextButton) {
+        this._managerVersion = version;
         /** @type {Map<number,Week>} */
         this._weeks = new Map();
         /** @type {Week} */
@@ -124,6 +126,8 @@ class WeekManager {
                 console.log("got data back from server");
                 //if at== data.week, drawgrid
                 console.log(d);
+                if (d.version != undefined && d.version != this._managerVersion)
+                    window.location.reload();
                 onComplete(d);
             },
             (d) => {
@@ -162,12 +166,8 @@ class WeekManager {
         let y = 0;
         for (const user of this._weeks.get(this._at).users()) {
             let x = 0;
-            console.log(" user: ");
-            console.log(user);
             for (const grid of user.grids(this._at)) {
-                console.log("   grid " + user._user + " (" + x + "," + y + ")")
                 if (grid != null) {
-                    console.log("      drawing grid " + grid._wordleDate);
                     document.getElementById(this._cellID(x, y)).innerHTML = grid.draw();
                 }
                 else
@@ -184,8 +184,6 @@ class WeekManager {
         if (dayCount >= 5) {
             y = 0;
             for (const user of this._weeks.get(this._at).users()) {
-                console.log("" + dayCount + " user: ");
-                console.log(user);
                 document.getElementById(this._cellID(dayCount, y)).innerHTML = user.score(averageScore, dayCount).toFixed(2);
                 y++;
             }
@@ -252,7 +250,7 @@ class WeekManager {
      */
     _prepareGrid(userFieldId, gridFieldId) {
         const user = User.ENCODE(/** @type{HTMLInputElement} */($(userFieldId)).value);
-        const grid = /** @type{HTMLInputElement} */ ($(gridFieldId)).value;
+        const grid = Grid.FIX(/** @type{HTMLInputElement} */($(gridFieldId)).value);
         if (user.length > 0)
             localStorage.setItem('WeekManager_UN', user);
 

@@ -1,4 +1,10 @@
 <?php
+
+function getExpectedVersion()
+{
+    return 4;
+}
+
 function getNextWeek()
 {
     $week = getWeekAfter($_POST["week"]);

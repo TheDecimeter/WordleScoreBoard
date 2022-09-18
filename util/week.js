@@ -10,15 +10,16 @@ class Week {
         //         this._users.set(u, new User(u, userData[u]));
         // }
 
-        /** @type{Map<string,string[]>} */
+        /** @type{Map<string,{user:string, days:{grid:string, day:string}[]}>} */
         let grids = new Map();
         for (const dayObj of days) {
             for (const day in dayObj) {
                 for (const user of dayObj[day]) {
                     for (const userName in user) {
-                        if (!grids.has(userName))
-                            grids.set(userName, []);
-                        grids.get(userName).push(user[userName]);
+                        const key=User.UNIFORM(userName);
+                        if (!grids.has(key))
+                            grids.set(key, {user: userName, days:[]});
+                        grids.get(key).days.push({ grid: user[userName], day: day });
                         // this._users.set(user, userGrid[user]);
                         break;
                     }
@@ -28,7 +29,7 @@ class Week {
         }
 
         for (const user of grids) {
-            const u = new User(user[0], user[1]);
+            const u = new User(user[1].user, user[1].days);
             this._users.set(u.user(), u);
         }
     }
@@ -40,8 +41,14 @@ class Week {
         return r;
     }
 
+    /**
+     * 
+     * @param {string} user 
+     * @param {string} grid 
+     * @returns 
+     */
     addGrid(user, grid) {
-        const u = new User(user, grid)
+        const u = new User(user, [{ grid: grid, day: "" + Grid.WORDLE_FROM_DATE() }])
         if (this._users.has(u.user()))
             this._users.get(u.user()).addGrid(grid);
         else {

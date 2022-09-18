@@ -17,10 +17,11 @@ class CommResponse {
         if (o.msgs !== undefined && o.code !== undefined) {
             this.msgs = o.msgs;
             this.code = o.code;
+            this.version = o.version;
             return;
         }
         try {
-            /** @type {{fail?:boolean, msgs:any[]}}*/
+            /** @type {{fail?:boolean, msgs:any[], version?:number}}*/
             let t  = JSON.parse(o);
             if (t.fail === undefined || !t.fail) {
                 if (t.msgs !== undefined && Array.isArray(t.msgs)) {
@@ -28,12 +29,14 @@ class CommResponse {
                         if (m.fail !== undefined && m.fail == true) {
                             console.log("server error message");
                             this.msgs = t.msgs;
-                            this.code = CommResponse.FAIL
+                            this.code = CommResponse.FAIL;
+                            this.version = undefined;
                             return;
                         }
                     console.log("successful message");
                     this.msgs = t.msgs;
                     this.code = CommResponse.SUCCESS;
+                    this.version = t.version;
                     return;
                 }
             }
@@ -42,6 +45,7 @@ class CommResponse {
                     console.log("server error message");
                     this.msgs = t.msgs;
                     this.code = CommResponse.FAIL
+                    this.version = t.version;
                     return;
                 }
             }
@@ -50,11 +54,13 @@ class CommResponse {
             console.log("parse error message");
             this.msgs = [e];
             this.code = CommResponse.CRASH;
+            this.version = undefined;
             return;
         }
         console.log("unknown error message");
         this.code = CommResponse.UNHANDLED;
         this.msgs = [obj];
+        this.version = undefined;
     }
 }
 
