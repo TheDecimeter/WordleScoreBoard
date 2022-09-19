@@ -6,10 +6,9 @@
  * periodically checks for updated grids
  */
 class WeekManager {
-
     /**
      * 
-     * @param {number} version the client version
+     * @param {number} ver the client version
      * @param {{msg:any}} laterWeekData data for the week furthest forward in time
      * @param {{msg:any}} earlierWeekData data for the week before the later week
      * @param {HTMLElement} display 
@@ -18,8 +17,8 @@ class WeekManager {
      * @param {HTMLButtonElement} prevButton submit button element
      * @param {HTMLButtonElement} nextButton submit button element
      */
-    constructor(version, laterWeekData, earlierWeekData, display, wordleDate, submitButton, prevButton, nextButton) {
-        this._managerVersion = version;
+    constructor(ver, laterWeekData, earlierWeekData, display, wordleDate, submitButton, prevButton, nextButton) {
+        this._managerVersion = ver;
         /** @type {Map<number,Week>} */
         this._weeks = new Map();
         /** @type {Week} */
