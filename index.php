@@ -120,12 +120,12 @@ process(event);
             <tbody id="table"></tbody>
         </table>
     </div>
-    <script src="util/comm.js"></script>
-    <script src="util/grid.js"></script>
-    <script src="util/user.js"></script>
-    <script src="util/week.js"></script>
-    <script src="util/weekManager.js"></script>
-    <script src="util/util.js"></script>
+    <script src="util/comm.js?1"></script>
+    <script src="util/grid.js?1"></script>
+    <script src="util/user.js?1"></script>
+    <script src="util/week.js?1"></script>
+    <script src="util/weekManager.js?1"></script>
+    <script src="util/util.js?1"></script>
     <script>
         //set data
         console.log("start");
