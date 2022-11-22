@@ -145,8 +145,8 @@ class Grid {
     static FIX(grid, day = null) {
         if (grid == null || grid.trim().length == 0)
             return "";
-        grid = grid.replace("nyt.com/wordle‌", "");
-        grid = grid.replace("nyt.com/wordle", "");
+        grid = grid.replace("\nnyt.com/wordle‌", "");
+        grid = grid.replace("\nnyt.com/wordle", "");
         let firstLine = this.GET_STATS_LINE(grid);
         if (firstLine != null)
             return grid;
