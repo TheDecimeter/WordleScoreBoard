@@ -100,6 +100,9 @@ class WeekManager {
      */
     addGrid(userFieldId, gridFieldId) {
         const data = this._prepareGrid(userFieldId, gridFieldId);
+        if(data==null)
+            return;
+        
         this._submitButton.disabled = true;
         this._addGrid("save", data, (d) => {
             this._refreshBoard(d.msgs[0].msg);
@@ -253,6 +256,10 @@ class WeekManager {
         if (user.length > 0)
             localStorage.setItem('WeekManager_UN', user);
 
+        if (grid.trim().length == 0 || user.trim().length == 0) {
+            console.log("no data found to send")
+            return null;
+        }
 
         let count = 1;
         if (this._at != null && this._weeks.get(this._at) != null) {

@@ -124,7 +124,7 @@ process(event);
     <script src="util/grid.js?2"></script>
     <script src="util/user.js?1"></script>
     <script src="util/week.js?1"></script>
-    <script src="util/weekManager.js?1"></script>
+    <script src="util/weekManager.js?2"></script>
     <script src="util/util.js?1"></script>
     <script>
         //set data
