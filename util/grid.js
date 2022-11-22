@@ -143,6 +143,8 @@ class Grid {
      * @returns the grid with a proper date and score header
      */
     static FIX(grid, day = null) {
+        grid = grid.replace("nyt.com/wordle‌", "");
+        grid = grid.replace("nyt.com/wordle", "");
         let firstLine = this.GET_STATS_LINE(grid);
         if (firstLine != null)
             return grid;

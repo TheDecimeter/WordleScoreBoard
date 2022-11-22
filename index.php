@@ -121,7 +121,7 @@ process(event);
         </table>
     </div>
     <script src="util/comm.js?1"></script>
-    <script src="util/grid.js?1"></script>
+    <script src="util/grid.js?2"></script>
     <script src="util/user.js?1"></script>
     <script src="util/week.js?1"></script>
     <script src="util/weekManager.js?1"></script>
