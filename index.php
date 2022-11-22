@@ -120,12 +120,12 @@ process(event);
             <tbody id="table"></tbody>
         </table>
     </div>
-    <script src="util/comm.js?1"></script>
-    <script src="util/grid.js?2"></script>
-    <script src="util/user.js?1"></script>
-    <script src="util/week.js?1"></script>
-    <script src="util/weekManager.js?2"></script>
-    <script src="util/util.js?1"></script>
+    <script src="util/comm.js?3"></script>
+    <script src="util/grid.js?3"></script>
+    <script src="util/user.js?3"></script>
+    <script src="util/week.js?3"></script>
+    <script src="util/weekManager.js?3"></script>
+    <script src="util/util.js?3"></script>
     <script>
         //set data
         console.log("start");
@@ -148,8 +148,9 @@ if (count($weekData->msg) < 2) {
         console.log("data");
         console.log(thisWeek);
         console.log(lastWeek);
+        const expectedVersion = 5;
         // updateBoard(jsonData.msg);
-        ScoreBoard = new WeekManager(4, thisWeek, lastWeek,
+        ScoreBoard = new WeekManager(expectedVersion, thisWeek, lastWeek,
          document.getElementById("table"),
          document.getElementById("weekDisplay"),
          document.getElementById("submitButton"),

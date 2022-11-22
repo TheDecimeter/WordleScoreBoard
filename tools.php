@@ -2,7 +2,7 @@
 
 function getExpectedVersion()
 {
-    return 4;
+    return 5;
 }
 
 function getNextWeek()
