@@ -1,2 +1,5 @@
-grids/
-err/
+grids/*
+err/*
+
+!err/h.txt
+!grids/h.txt
