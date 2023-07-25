@@ -24,7 +24,6 @@
             border: 1px solid black;
             border-radius: 10px;
             padding: 12px;
-            min-width: 120px;
             width: 120px;
         }
 
@@ -32,49 +31,54 @@
             color : lightgray;
         }
 
-        .boxM {
-            background-color: white;
-            padding: 10px;
+        .boxGeneric {
+            background-color: transparent;
+            text-align: center;
+            font-family: Monospace;
+            padding: 6px;
+            width: 10px;
+            height: 10px;
             display: inline-block;
-            border: 1px solid lightgray;
+            border: 1px solid black;
             border-radius: 10%;
             margin: 1px;
+        }
+        
+        .boxM {
+            background-color: white;
+            border: 1px solid lightgray;
         }
 
         .boxY {
             background-color: yellow;
-            padding: 10px;
-            display: inline-block;
-            border: 1px solid black;
-            border-radius: 10%;
-            margin: 1px;
         }
 
         .boxG {
             background-color: green;
-            padding: 10px;
-            display: inline-block;
-            border: 1px solid black;
-            border-radius: 10%;
-            margin: 1px;
         }
 
         .boxW {
             background-color: white;
-            padding: 10px;
-            display: inline-block;
-            border: 1px solid black;
-            border-radius: 10%;
-            margin: 1px;
         }
 
-        .boxB {
-            background-color: #222;
-            padding: 10px;
-            display: inline-block;
-            border: 1px solid black;
-            border-radius: 10%;
-            margin: 1px;
+        .boxP{
+            background-color: purple;
+        }
+
+        .boxBr{
+            background-color: brown;
+        }
+
+        .boxR{
+            background-color: red;
+        }
+
+        .boxBl{
+            background-color: blue;
+        }
+
+        .boxO{
+            background-color: orange;
         }
     </style>
 </head>
@@ -97,12 +101,12 @@
 
     <!-- <input type="file" id="file-selector" multiple> -->
 <script>
-  const fileSelector = document.getElementById('file-selector');
-  fileSelector.addEventListener('change', (event) => {
-    // const fileList = event.target.files;
-    // console.log(fileList);
-process(event);
-  });
+//   const fileSelector = document.getElementById('file-selector');
+//   fileSelector.addEventListener('change', (event) => {
+//     // const fileList = event.target.files;
+//     // console.log(fileList);
+// process(event);
+//   });
 </script>
 
     <!-- end -->
@@ -127,19 +131,25 @@ process(event);
     <script src="util/weekManager.js?3"></script>
     <script src="util/util.js?3"></script>
     <script>
+
         //set data
         console.log("start");
         <?php
 // set array to data
 include_once "tools.php";
 
+//if you see PHP errors here, you may need to remove h.txt from /grids
 $thisWeek = getRecentWeek();
 $weekData = getWeek($thisWeek, 0);
-echo "var thisWeek = " . json_encode($weekData) . ";\n";
+$thisWeekJSON = json_encode($weekData);
+$bool = count($weekData->msg) < 2;
+$lastWeek = getWeekBefore($thisWeek);
+$lastWeekJSON = json_encode(getWeek($lastWeek, 0));
+echo "</script>\n<script>\n";
+echo "var thisWeek = " . $thisWeekJSON . ";\n";
 
-if (count($weekData->msg) < 2) {
-    $lastWeek = getWeekBefore($thisWeek);
-    echo "var lastWeek = " . json_encode(getWeek($lastWeek, 0)) . ";\n";
+if ($bool) {
+    echo "var lastWeek = " . $lastWeekJSON . ";\n";
 } else {
     echo "var lastWeek = null;\n";
 }

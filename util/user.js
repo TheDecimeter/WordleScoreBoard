@@ -90,10 +90,10 @@ class User {
             score = averageScore;
             prefix = "Game Average"
         }
-        return "<span class = 'missedTxt'>" + prefix + "</span><BR>" + Grid.DRAW_EMPTY(score, ["\t"]).replaceAll("\t", "<span class = 'boxM'></span>");
+        return "<span class = 'missedTxt'>" + prefix + "</span><BR>" + Grid.DRAW_EMPTY(score, ["\t"]).replaceAll("\t", "<span class = 'boxGeneric boxM'></span>");
     }
     drawFinal(averageScore, days) {
-        return Grid.DRAW_EMPTY(this.score(averageScore, days), ["\t"]).replaceAll("\t", "<span class = 'boxM'></span>");
+        return Grid.DRAW_EMPTY(this.score(averageScore, days), ["\t"]).replaceAll("\t", "<span class = 'boxGeneric boxM'></span>");
     }
 
     /**

@@ -16,14 +16,25 @@ class Grid {
         this._wordleDay = Grid.PARSE_DAY(this._gridString);
         this._wordleWeek = Grid.WORDLE_WEEK(this._wordleDay);
         this._wordleDate = Grid.WORDLE_DATE(this._wordleDay);
+        this._gridPix = Grid.CALC_WIDTH_PX(this._gridString);
+    }
+
+    gridPix() {
+        return Grid.CALC_WIDTH_PX(this._gridString);
+        return this._gridPix;
     }
 
     draw() {
         let r = this._gridString.replaceAll("\n", "<BR>");
-        r = r.replaceAll("🟨", "<span class = 'boxY'></span>");
-        r = r.replaceAll("⬜", "<span class = 'boxW'></span>");
-        r = r.replaceAll("🟩", "<span class = 'boxG'></span>");
-        r = r.replaceAll("⬛", "<span class = 'boxW'></span>");
+        r = r.replaceAll("🟨", "<span class = 'boxGeneric boxY'>&nbsp;</span>");
+        r = r.replaceAll("⬜", "<span class = 'boxGeneric boxW'>&nbsp;</span>");
+        r = r.replaceAll("🟩", "<span class = 'boxGeneric boxG'>&nbsp;</span>");
+        r = r.replaceAll("⬛", "<span class = 'boxGeneric boxW'>&nbsp;</span>"); //some browser is getting this character confused maybe?
+        r = r.replaceAll("🟪", "<span class = 'boxGeneric boxP'>&nbsp;</span>");
+        r = r.replaceAll("🟫", "<span class = 'boxGeneric boxBr'>&nbsp;</span>");
+        r = r.replaceAll("🟥", "<span class = 'boxGeneric boxR'>&nbsp;</span>");
+        r = r.replaceAll("🟦", "<span class = 'boxGeneric boxBl'>&nbsp;</span>");
+        r = r.replaceAll("🟧", "<span class = 'boxGeneric boxO'>&nbsp;</span>");
         return r;
     }
 
@@ -145,6 +156,8 @@ class Grid {
     static FIX(grid, day = null) {
         if (grid == null || grid.trim().length == 0)
             return "";
+        while (grid.includes("  "))
+            grid = grid.replaceAll("  ", " ");
         grid = grid.replace("\nnyt.com/wordle‌", "");
         grid = grid.replace("\nnyt.com/wordle", "");
         let firstLine = this.GET_STATS_LINE(grid);
@@ -172,15 +185,99 @@ class Grid {
         let score = 0;
         for (const line of g) {
             const l = line.trim();
-            if (l.startsWith("🟨") ||
-                l.startsWith("⬜") ||
-                l.startsWith("🟩") ||
-                l.startsWith("⬛"))
+            if (this.IS_DATA_LINE(l))
                 score++;
         }
         if (score == 0)
             return "X/6";
         return score + "/6";
+    }
+
+    static CALC_WIDTH_PX(grid) {
+        const len = this.DATA_LENGTH(grid);
+        return len * 12*2; //10 width + 1 margin on each side;
+    }
+
+    /**
+     * 
+     * @param {string} l the line of data to check
+     * @returns true if 
+     */
+    static IS_DATA_LINE(l) {
+        return this.IS_SQUARE_CHAR(l, 0);
+    }
+
+    /**
+     * 
+     * @param {string} grid - a string representation of the grid
+     */
+    static DATA_LENGTH(grid) {
+        let g = grid.split("\n");
+        for (const line of g) {
+            const l = line.trim();
+            if (this.IS_DATA_LINE(l)) {
+                let end = l.length - 1
+                for (; end >= 0; --end)
+                    if (this.IS_SQUARE_CHAR(l, end)) {
+                        let sub = l.substring(0, end + 1);
+                        for (const s of this.SQUARES) //squares vary in character length so replace all with a single character
+                            sub = sub.replaceAll(s, " ");
+                        return sub.length;
+                    }
+            }
+        }
+    }
+
+    /**
+     * see if a  character is a 
+     * @param {string} c the string to check the character of
+     * @param {number} i the index to check
+     * @returns true if the character at the index is a square
+     */
+    // static IS_SQUARE_CHAR(c, i) {
+    //     const x = c.indexOf("🟩");
+    //     return c.indexOf("🟨", i) == i ||
+    //         c.indexOf("⬜", i) == i ||
+    //         c.indexOf("🟩", i) == i ||
+    //         c.indexOf("⬛", i) == i ||
+    //         c.indexOf("🟪", i) == i ||
+    //         c.indexOf("🟫", i) == i ||
+    //         c.indexOf("🟥", i) == i ||
+    //         c.indexOf("🟦", i) == i ||
+    //         c.indexOf("🟧", i) == i;
+    // }
+    static IS_SQUARE_CHAR(c, i) {
+        const x = this._ISSTR("🟩", i, c);
+        for (const s of this.SQUARES) {
+            if (this._ISSTR(s, i, c))
+                return true;
+        }
+        return false;
+        // return this._ISSTR("🟨", i, c)  ||
+        //     this._ISSTR("⬜", i, c)  ||
+        //     this._ISSTR("🟩", i, c)  ||
+        //     this._ISSTR("⬛", i, c)  ||
+        //     this._ISSTR("🟪", i, c)  ||
+        //     this._ISSTR("🟫", i, c)  ||
+        //     this._ISSTR("🟥", i, c)  ||
+        //     this._ISSTR("🟦", i, c)  ||
+        //     this._ISSTR("🟧", i, c) ;
+    }
+
+    static SQUARES = ["🟨", "⬜", "🟩", "⬛", "🟪", "🟫", "🟥", "🟦", "🟧"]
+
+    /**
+     * similar to string[at]=="x" but works for unicode
+     * @param {string} str - the sample string to check for
+     * @param {number} at - the area of the inStr to check at
+     * @param {string} inStr - the string to check in
+     * @returns 
+     */
+    static _ISSTR(str, at, inStr) {
+        for (let i = 0; i < str.length; ++i)
+            if (str[i] != inStr[at + i])
+                return false;
+        return true;
     }
 
     /**

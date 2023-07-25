@@ -100,9 +100,9 @@ class WeekManager {
      */
     addGrid(userFieldId, gridFieldId) {
         const data = this._prepareGrid(userFieldId, gridFieldId);
-        if(data==null)
+        if (data == null)
             return;
-        
+
         this._submitButton.disabled = true;
         this._addGrid("save", data, (d) => {
             this._refreshBoard(d.msgs[0].msg);
@@ -166,10 +166,16 @@ class WeekManager {
             this._createEmptyTable(week, dayCount);
 
         let y = 0;
+        let maxGridWidth = 0;
         for (const user of this._weeks.get(this._at).users()) {
             let x = 0;
             for (const grid of user.grids(this._at)) {
                 if (grid != null) {
+                    if(maxGridWidth < grid.gridPix()){
+                        console.log(`setting max grid width: ${grid.gridPix()} for ${grid._wordleDay}`)
+                        maxGridWidth=grid.gridPix();
+                    }
+                    // maxGridWidth = Math.max(maxGridWidth, grid.gridPix());
                     document.getElementById(this._cellID(x, y)).innerHTML = grid.draw();
                 }
                 else
@@ -181,6 +187,13 @@ class WeekManager {
             }
             y++;
         }
+
+        maxGridWidth;
+
+        console.log("min-width ", maxGridWidth)
+        const cells = /** @type{HTMLCollectionOf<HTMLElement>} */(document.getElementsByClassName('cell'));
+        for (const cell of cells)
+            cell.style.minWidth = `${maxGridWidth}px`;
 
         //fill scores
         if (dayCount >= 5) {
@@ -261,7 +274,7 @@ class WeekManager {
             return null;
         }
 
-        let count = 1;
+        let count = 0;
         if (this._at != null && this._weeks.get(this._at) != null) {
             const week = this._weeks.get(this._at);
             week.addGrid(user, grid);

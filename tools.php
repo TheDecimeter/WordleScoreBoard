@@ -41,8 +41,20 @@ function getWeek($week, $count)
     $r = new \stdClass();
     $r->msg = [];
     $r->count = countFiles($path);
-    $r->to = "client";
+    $r->to = "clientGetWeek";
     if ($week == null || !file_exists($path) || countFiles($path) == intval($count)) {
+        if ($week == null) {
+            $r->to = "clientGetnull";
+        }
+
+        if (!file_exists($path)) {
+            $r->to = "clientGetfile";
+        }
+
+        if (countFiles($path) == intval($count)) {
+            $r->to = "clientGetno";
+        }
+
         return $r;
     }
 
@@ -63,6 +75,7 @@ function getDay($week, $day)
     foreach ($it as $file) {
         $f = $file->openFile("r");
         if (!$f) {
+            array_push($r->$day, "failed file");
             continue;
         }
 
@@ -72,7 +85,10 @@ function getDay($week, $day)
             $g->$user = $f->fread($file->getSize());
             array_push($r->$day, $g);
             $f = null;
+        } else {
+            array_push($r->$day, "failed file");
         }
+
     }
     return $r;
 }
@@ -257,7 +273,7 @@ function saveGrid()
         fwrite($f, $grid);
         fclose($f);
         $r = new \stdClass();
-        $r->to = "client";
+        $r->to = "clientxx";
         $r->msg = getWeek($week, $count);
         return $r;
     }
