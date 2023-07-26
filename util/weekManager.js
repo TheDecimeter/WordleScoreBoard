@@ -166,15 +166,23 @@ class WeekManager {
             this._createEmptyTable(week, dayCount);
 
         let y = 0;
-        let maxGridWidth = 0;
+        // let maxGridWidth = 0;
+        let maxGridWidths = [];
+        let add = (n, i) => {
+            if (maxGridWidths[i] == undefined)
+                maxGridWidths[i] = n;
+            else
+                maxGridWidths[i] = Math.max(n, maxGridWidths[i]);
+        }
         for (const user of this._weeks.get(this._at).users()) {
             let x = 0;
             for (const grid of user.grids(this._at)) {
                 if (grid != null) {
-                    if(maxGridWidth < grid.gridPix()){
-                        console.log(`setting max grid width: ${grid.gridPix()} for ${grid._wordleDay}`)
-                        maxGridWidth=grid.gridPix();
-                    }
+                    // if (maxGridWidth < grid.gridPix()) {
+                    //     console.log(`setting max grid width: ${grid.gridPix()} for ${grid._wordleDay}`)
+                    //     maxGridWidth = grid.gridPix();
+                    // }
+                    add(grid.gridPix(), x);
                     // maxGridWidth = Math.max(maxGridWidth, grid.gridPix());
                     document.getElementById(this._cellID(x, y)).innerHTML = grid.draw();
                 }
@@ -188,12 +196,20 @@ class WeekManager {
             y++;
         }
 
-        maxGridWidth;
+        console.log("min-width ", maxGridWidths)
+        // const cells = /** @type{HTMLCollectionOf<HTMLElement>} */(document.getElementsByClassName('cell'));
+        // for (const cell of cells)
+        //     cell.style.minWidth = `${maxGridWidth}px`;
 
-        console.log("min-width ", maxGridWidth)
-        const cells = /** @type{HTMLCollectionOf<HTMLElement>} */(document.getElementsByClassName('cell'));
-        for (const cell of cells)
-            cell.style.minWidth = `${maxGridWidth}px`;
+        for (let xx = 0; xx < dayCount; ++xx) {
+            const maxWidth = maxGridWidths[xx];
+            if (maxWidth)
+                for (let yy = 0; yy < y; ++yy) {
+                    console.log(`danx set width for ${xx} ${yy} ${maxWidth}`)
+                    document.getElementById(this._cellID(xx, yy)).style.minWidth = `${maxWidth}px`;
+                }
+        }
+
 
         //fill scores
         if (dayCount >= 5) {

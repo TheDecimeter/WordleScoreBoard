@@ -24,11 +24,15 @@
             border: 1px solid black;
             border-radius: 10px;
             padding: 12px;
-            width: 120px;
+            min-width: 130px;
         }
 
         .missedTxt {
             color : lightgray;
+        }
+
+        .invisible{
+            opacity: 0;
         }
 
         .boxGeneric {
@@ -43,7 +47,11 @@
             border-radius: 10%;
             margin: 1px;
         }
-        
+
+        .boxTrans{
+            opacity: 0;
+        }
+
         .boxM {
             background-color: white;
             border: 1px solid lightgray;

@@ -4,6 +4,7 @@
 //class to handle a grid
 class Grid {
     static SkipWords = ["Turdle"];
+    static SQUARES = ["🟨", "⬜", "🟩", "⬛", "🟪", "🟫", "🟥", "🟦", "🟧"]
 
     /**
      * 
@@ -20,22 +21,30 @@ class Grid {
     }
 
     gridPix() {
-        return Grid.CALC_WIDTH_PX(this._gridString);
         return this._gridPix;
     }
 
     draw() {
-        let r = this._gridString.replaceAll("\n", "<BR>");
-        r = r.replaceAll("🟨", "<span class = 'boxGeneric boxY'>&nbsp;</span>");
-        r = r.replaceAll("⬜", "<span class = 'boxGeneric boxW'>&nbsp;</span>");
-        r = r.replaceAll("🟩", "<span class = 'boxGeneric boxG'>&nbsp;</span>");
-        r = r.replaceAll("⬛", "<span class = 'boxGeneric boxW'>&nbsp;</span>"); //some browser is getting this character confused maybe?
-        r = r.replaceAll("🟪", "<span class = 'boxGeneric boxP'>&nbsp;</span>");
-        r = r.replaceAll("🟫", "<span class = 'boxGeneric boxBr'>&nbsp;</span>");
-        r = r.replaceAll("🟥", "<span class = 'boxGeneric boxR'>&nbsp;</span>");
-        r = r.replaceAll("🟦", "<span class = 'boxGeneric boxBl'>&nbsp;</span>");
-        r = r.replaceAll("🟧", "<span class = 'boxGeneric boxO'>&nbsp;</span>");
+        let gridLines = this._gridString.split("\n");
+        for (let i = 0; i < gridLines.length; ++i) {
+            const line = gridLines[i];
+            if (Grid.IS_DATA_LINE(line)) {
+                gridLines[i] = line.replaceAll(' ', Grid._squareBox("Trans", "&nbsp;"))
+            }
+        }
+
+        let r = gridLines.join("<BR>");
+        const colorClass = ["Y", "W", "G", "W", "P", "Br", "R", "Bl", "O"];
+        for (let i = 0; i < Grid.SQUARES.length; ++i)
+            r = r.replaceAll(Grid.SQUARES[i], Grid._squareBox(colorClass[i], Grid.SQUARES[i]))
+        r = r.replaceAll("⬛", "⬜");
+
+
         return r;
+    }
+
+    static _squareBox(colorClass, squareChar) {
+        return `<span class = 'boxGeneric box${colorClass}'><span class = 'invisible'>${squareChar}</span></span>`;
     }
 
     static DRAW_EMPTY(score, chars = ["⬜"]) {
@@ -148,7 +157,7 @@ class Grid {
     }
 
     /**
-     * 
+     * Standardize formatting of the grid, remove promo text, etc
      * @param {string} grid 
      * @param {number | string} day 
      * @returns the grid with a proper date and score header
@@ -158,11 +167,30 @@ class Grid {
             return "";
         while (grid.includes("  "))
             grid = grid.replaceAll("  ", " ");
+        grid = grid.replaceAll("\r", "");
         grid = grid.replace("\nnyt.com/wordle‌", "");
         grid = grid.replace("\nnyt.com/wordle", "");
+        grid = grid.replace(`\n#phrazle\n\nhttps://solitaired.com/phrazle`, "");
         let firstLine = this.GET_STATS_LINE(grid);
+
+        //remove duplicate line breaks between grid lines (phrazle)
+        let gridLines = grid.split("\n")
+        gridLines = gridLines.filter((v, i) => {
+            if (v == firstLine)
+                return false;
+            if (v.length > 0)
+                return true;
+            if (Grid.IS_DATA_LINE(gridLines[i + 1])) {
+                return false;
+            }
+            return true;
+        });
+
+        grid = gridLines.join("\n");
+
+        //check that there is a first line with stats, if not, create one
         if (firstLine != null)
-            return grid;
+            return firstLine + "\n\n" + grid;
         if (day == null)
             return this.FILLER_WORD() + " " + this.WORDLE_FROM_DATE() + " " + this.CALC_SCORE(grid) + "\n\n" + grid;
         return this.FILLER_WORD() + " " + day + " " + this.CALC_SCORE(grid) + "\n\n" + grid;
@@ -195,7 +223,7 @@ class Grid {
 
     static CALC_WIDTH_PX(grid) {
         const len = this.DATA_LENGTH(grid);
-        return len * 12*2; //10 width + 1 margin on each side;
+        return len * 26; //10 width + 1 margin on each side;
     }
 
     /**
@@ -204,6 +232,8 @@ class Grid {
      * @returns true if 
      */
     static IS_DATA_LINE(l) {
+        if (l == null)
+            return false;
         return this.IS_SQUARE_CHAR(l, 0);
     }
 
@@ -234,18 +264,6 @@ class Grid {
      * @param {number} i the index to check
      * @returns true if the character at the index is a square
      */
-    // static IS_SQUARE_CHAR(c, i) {
-    //     const x = c.indexOf("🟩");
-    //     return c.indexOf("🟨", i) == i ||
-    //         c.indexOf("⬜", i) == i ||
-    //         c.indexOf("🟩", i) == i ||
-    //         c.indexOf("⬛", i) == i ||
-    //         c.indexOf("🟪", i) == i ||
-    //         c.indexOf("🟫", i) == i ||
-    //         c.indexOf("🟥", i) == i ||
-    //         c.indexOf("🟦", i) == i ||
-    //         c.indexOf("🟧", i) == i;
-    // }
     static IS_SQUARE_CHAR(c, i) {
         const x = this._ISSTR("🟩", i, c);
         for (const s of this.SQUARES) {
@@ -253,18 +271,8 @@ class Grid {
                 return true;
         }
         return false;
-        // return this._ISSTR("🟨", i, c)  ||
-        //     this._ISSTR("⬜", i, c)  ||
-        //     this._ISSTR("🟩", i, c)  ||
-        //     this._ISSTR("⬛", i, c)  ||
-        //     this._ISSTR("🟪", i, c)  ||
-        //     this._ISSTR("🟫", i, c)  ||
-        //     this._ISSTR("🟥", i, c)  ||
-        //     this._ISSTR("🟦", i, c)  ||
-        //     this._ISSTR("🟧", i, c) ;
     }
 
-    static SQUARES = ["🟨", "⬜", "🟩", "⬛", "🟪", "🟫", "🟥", "🟦", "🟧"]
 
     /**
      * similar to string[at]=="x" but works for unicode
