@@ -1,5 +1,6 @@
 grids/*
 err/*
+values.js
 
 !err/h.txt
 !grids/h.txt

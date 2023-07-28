@@ -160,7 +160,7 @@ class WeekManager {
         const averageScore = week.averageScore();
 
         this._updateWeekDisplay();
-        if (dayCount >= 5)
+        if (dayCount >= 5 * Grid.TIMES_PER_DAY)
             this._createEmptyTable(week, dayCount + 1);
         else
             this._createEmptyTable(week, dayCount);
@@ -196,23 +196,18 @@ class WeekManager {
             y++;
         }
 
-        console.log("min-width ", maxGridWidths)
-        // const cells = /** @type{HTMLCollectionOf<HTMLElement>} */(document.getElementsByClassName('cell'));
-        // for (const cell of cells)
-        //     cell.style.minWidth = `${maxGridWidth}px`;
 
         for (let xx = 0; xx < dayCount; ++xx) {
             const maxWidth = maxGridWidths[xx];
             if (maxWidth)
                 for (let yy = 0; yy < y; ++yy) {
-                    console.log(`danx set width for ${xx} ${yy} ${maxWidth}`)
                     document.getElementById(this._cellID(xx, yy)).style.minWidth = `${maxWidth}px`;
                 }
         }
 
 
         //fill scores
-        if (dayCount >= 5) {
+        if (dayCount >= 5 * Grid.TIMES_PER_DAY) {
             y = 0;
             for (const user of this._weeks.get(this._at).users()) {
                 document.getElementById(this._cellID(dayCount, y)).innerHTML = user.score(averageScore, dayCount).toFixed(2);
@@ -248,7 +243,7 @@ class WeekManager {
             }
         }
 
-        if (dayCount > 5)
+        if (dayCount > 5 * Grid.TIMES_PER_DAY)
             dayCount--;
         let i = 0;
         for (const date of Grid.DATES_FROM_DATE(Grid.WORDLE_DATE(this._at), dayCount)) {

@@ -1,6 +1,3 @@
-
-
-
 //class to handle a grid
 class Grid {
     static SkipWords = ["Turdle"];
@@ -103,17 +100,35 @@ class Grid {
         return r;
     }
 
+
+    // @ts-ignore
+    static _DAY_OFFSET = window.dayOffset ? window.dayOffset : 5;
+    // @ts-ignore
+    static _DAY = window.firstDay ? window.firstDay : 226;
+    // @ts-ignore
+    static _DATE = window.firstDate ? new Date(window.firstDate) : new Date(2022, 0, 31);
+    // @ts-ignore
+    static TIMES_PER_DAY = window.timesPerDay ? window.timesPerDay : 1;
+
     static WORDLE_DATE(wordleDay) {
-        const days = (wordleDay - 226) * 86400000;
+        const days = Math.floor((wordleDay - this._DAY) / this.TIMES_PER_DAY) * 86400000;
         return new Date(this.START_DAY().getTime() + days);
     }
 
-    static WORDLE_FROM_DATE() {
-        return 226 + Math.round((this.TODAY().getTime() - this.START_DAY().getTime()) / 86400000);
+    static WORDLE_FROM_DATE(day = this.TODAY()) {
+        const fromDay = day.getTime();
+        const startDay = this.START_DAY().getTime()
+        const millisFromToday = fromDay - startDay;
+
+        return this._DAY + Math.round((millisFromToday) / 86400000) * this.TIMES_PER_DAY;
     }
 
     static WORDLE_WEEK(wordleDay = this.WORDLE_FROM_DATE()) {
-        return Math.floor((wordleDay + 5) / 7) * 7 - 5;
+        const offsetDay = wordleDay - this._DAY_OFFSET;
+        const normalizedOffset = Math.floor((offsetDay) / (7 * this.TIMES_PER_DAY))
+        const returnToWeek = (7 * this.TIMES_PER_DAY);
+        const weekDays = normalizedOffset * returnToWeek
+        return weekDays + this._DAY_OFFSET;
     }
 
     static TODAY(date = new Date()) {
@@ -122,7 +137,8 @@ class Grid {
     }
 
     static START_DAY() {
-        return new Date(2022, 0, 31);
+        return this._DATE;
+        // return new Date(2022, 0, 31);
     }
 
     /**
@@ -265,27 +281,12 @@ class Grid {
      * @returns true if the character at the index is a square
      */
     static IS_SQUARE_CHAR(c, i) {
-        const x = this._ISSTR("🟩", i, c);
+        const x = c.includes("🟩", i);
         for (const s of this.SQUARES) {
-            if (this._ISSTR(s, i, c))
+            if (c.includes(s, i))
                 return true;
         }
         return false;
-    }
-
-
-    /**
-     * similar to string[at]=="x" but works for unicode
-     * @param {string} str - the sample string to check for
-     * @param {number} at - the area of the inStr to check at
-     * @param {string} inStr - the string to check in
-     * @returns 
-     */
-    static _ISSTR(str, at, inStr) {
-        for (let i = 0; i < str.length; ++i)
-            if (str[i] != inStr[at + i])
-                return false;
-        return true;
     }
 
     /**
@@ -301,7 +302,7 @@ class Grid {
             next: function () {
                 i++;
                 return {
-                    value: new Date(startDay.getTime() + i * 86400000),
+                    value: new Date(startDay.getTime() + Math.floor(i/Grid.TIMES_PER_DAY) * 86400000),
                     done: i >= length
                 }
             },

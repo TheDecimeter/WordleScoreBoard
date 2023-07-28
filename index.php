@@ -132,6 +132,7 @@
             <tbody id="table"></tbody>
         </table>
     </div>
+    <script src="values.js"></script>
     <script src="util/comm.js?3"></script>
     <script src="util/grid.js?3"></script>
     <script src="util/user.js?3"></script>
