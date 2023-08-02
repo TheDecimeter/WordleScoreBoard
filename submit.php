@@ -11,13 +11,18 @@ if ($_GET["act"] == "save") {
     $m->version = getExpectedVersion();
     echo json_encode($m);
 }
-if ($_GET["act"] == "next") {
+else if ($_GET["act"] == "next") {
     $m->msgs = [getNextWeek()];
     $m->version = getExpectedVersion();
     echo json_encode($m);
 }
-if ($_GET["act"] == "prev") {
+else if ($_GET["act"] == "prev") {
     $m->msgs = [getPrevWeek()];
+    $m->version = getExpectedVersion();
+    echo json_encode($m);
+}
+else if ($_GET["act"] == "delete") {
+    $m->msgs = [deleteGrid()];
     $m->version = getExpectedVersion();
     echo json_encode($m);
 }

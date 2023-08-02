@@ -1,6 +1,8 @@
 //class to handle a grid
 class Grid {
-    static SkipWords = ["Turdle"];
+
+    // @ts-ignore
+    static SkipWords = window.skipWords ? window.skipWords : ["Turdle"];
     static SQUARES = ["🟨", "⬜", "🟩", "⬛", "🟪", "🟫", "🟥", "🟦", "🟧"]
 
     /**
@@ -302,7 +304,7 @@ class Grid {
             next: function () {
                 i++;
                 return {
-                    value: new Date(startDay.getTime() + Math.floor(i/Grid.TIMES_PER_DAY) * 86400000),
+                    value: new Date(startDay.getTime() + Math.floor(i / Grid.TIMES_PER_DAY) * 86400000),
                     done: i >= length
                 }
             },

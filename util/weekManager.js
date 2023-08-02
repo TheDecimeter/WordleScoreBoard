@@ -16,8 +16,10 @@ class WeekManager {
      * @param {HTMLButtonElement} submitButton submit button element
      * @param {HTMLButtonElement} prevButton submit button element
      * @param {HTMLButtonElement} nextButton submit button element
+     * @param {HTMLButtonElement} delButton submit button element
+     * @param {number} deleteDelay how long to show the delete button for
      */
-    constructor(version, laterWeekData, earlierWeekData, display, wordleDate, submitButton, prevButton, nextButton) {
+    constructor(version, laterWeekData, earlierWeekData, display, wordleDate, submitButton, prevButton, nextButton, delButton, deleteDelay) {
         this._managerVersion = version;
         /** @type {Map<number,Week>} */
         this._weeks = new Map();
@@ -30,11 +32,15 @@ class WeekManager {
 
         /** @type {Week} */
         this._currentWeek = null;
+        this._lastSave = {};
 
         this._wordleDate = wordleDate;
         this._display = display;
         this._prevButton = prevButton;
         this._nextButton = nextButton;
+        this._delButton = delButton;
+        this._delDelay = deleteDelay;
+        this._delButton.style.display = "none";
         // this._refreshBoard(data);
         this._submitButton = submitButton;
         this._at = Grid.WORDLE_WEEK();
@@ -55,6 +61,10 @@ class WeekManager {
         const week = new Week(weekData);
         this._weeks.set(week.getWordleWeek(), week);
         return week;
+    }
+
+    _delWeek(week) {
+        this._weeks.delete(week);
     }
 
     /**
@@ -80,13 +90,13 @@ class WeekManager {
     queryForBoard(dir) {
         this._prevButton.disabled = true;
         this._nextButton.disabled = true;
-        const data = this._prepareDir(dir);
+        const data = this._prepareDirection(dir);
         const act = dir < 0 ? "prev" : "next";
         if (data.nWeekGuess != -1) {
             this._at = data.nWeekGuess;
             this._updateWeekDisplay();
         }
-        this._addGrid(act, data.data, (d) => {
+        this._updateGrid(act, data.data, (d) => {
             this._refreshBoard(d.msgs[0].msg);
             this._prevButton.disabled = false;
             this._nextButton.disabled = false;
@@ -104,10 +114,43 @@ class WeekManager {
             return;
 
         this._submitButton.disabled = true;
-        this._addGrid("save", data, (d) => {
-            this._refreshBoard(d.msgs[0].msg);
+        this._hideDeleteButton();
+        this._updateGrid("save", data, (d) => {
+            const data = d.msgs[0];
+            this._refreshBoard(data.msg);
+            if (data.time) {
+                this._lastSave.time = data.time;
+                this._showDeleteButton();
+            }
+            else
+                this._lastSave = {};
             this._submitButton.disabled = false;
         });
+    }
+
+    _showDeleteButton() {
+        this._delButton.style.display = "inline";
+        const delay = this._delDelay;
+        const startTime = Date.now();
+        this._delButton.value = `Undo Submission for ${this._lastSave.user} (${delay})`;
+        this.undoTimer = setInterval(() => {
+            const remainingTime = delay - Math.ceil((Date.now() - startTime) / 1000);
+            if (remainingTime <= 0) {
+                this._hideDeleteButton();
+            }
+            this._delButton.value = `Undo Submission for ${this._lastSave.user} (${remainingTime})`
+        }, 10);
+
+        this._delButton.onclick = () => {
+            this._hideDeleteButton();
+            this._deleteLatestGrid();
+        }
+    }
+
+    _hideDeleteButton() {
+        if (this.undoTimer)
+            clearInterval(this.undoTimer);
+        this._delButton.style.display = "none";
     }
 
     /**
@@ -116,13 +159,8 @@ class WeekManager {
      * @param {FormData} data the data to send
      * @param {(d:any)=>void} onComplete the function to do on completion
      */
-    _addGrid(action, data, onComplete) {
+    _updateGrid(action, data, onComplete) {
         //if week exists, add grid to week, otherwise, make a new week
-
-        // const weekNum = Week.getWordleWeek();
-        // this._weeks.set(weekNum, week);
-        // if (weekNum == this._currentWeek)
-        //     this.drawGrid(this._at);
         Comm.Send(action, data).then(
             (d) => {
                 console.log("got data back from server");
@@ -148,13 +186,29 @@ class WeekManager {
         )
     }
 
+    _deleteLatestGrid() {
+        const delData = this._createForm(this._lastSave);
+
+        this._updateGrid("delete", delData, (d) => {
+            console.log('delete data returned');
+            console.log(d);
+            const data = d.msgs[0];
+            if (!data.msg || !data.msg.msg || data.msg.msg.length == 0)
+                this._delWeek(this._at);
+            this._refreshBoard(data.msg);
+        });
+    }
+
     drawGrid() {
         if (this._at == null)
             return;
 
         const week = this._weeks.get(this._at);
-        if (week == null)
+        if (week == null) {
+            while (this._display.firstChild)
+                this._display.removeChild(this._display.lastChild);
             return;
+        }
         const latestDay = week.latestDay();
         const dayCount = (latestDay - this._at) + 1;
         const averageScore = week.averageScore();
@@ -270,13 +324,45 @@ class WeekManager {
     }
 
     /**
+     * 
+     * @param {HTMLInputElement} grid 
+     */
+    _gridValidation(grid) {
+        const wellFormedGrid = Grid.FIX(grid.value)
+
+        // @ts-ignore
+        if (window.validateGrid) {
+            const firstLine = Grid.GET_STATS_LINE(wellFormedGrid);
+            // @ts-ignore
+            if (!window.validateGrid(wellFormedGrid, firstLine))
+                return null;
+        }
+
+        return wellFormedGrid;
+    }
+
+    /**
+     * 
+     * @param {any} fromObj - the object to turn into a form
+     * @returns a new form object
+     */
+    _createForm(fromObj) {
+        const r = new FormData();
+        for (const m in fromObj)
+            r.append(m, fromObj[m].toString());
+        return r;
+    }
+
+    /**
      * add a new grid, and send to the server for an update
      * @param {string} userFieldId the id of the text area which contains the user id
      * @param {string} gridFieldId the id of the text area which contains the grid
      */
     _prepareGrid(userFieldId, gridFieldId) {
         const user = User.ENCODE(/** @type{HTMLInputElement} */($(userFieldId)).value);
-        const grid = Grid.FIX(/** @type{HTMLInputElement} */($(gridFieldId)).value);
+        const grid = this._gridValidation(/** @type{HTMLInputElement} */($(gridFieldId)));
+        if (grid == null)
+            return;
         if (user.length > 0)
             localStorage.setItem('WeekManager_UN', user);
 
@@ -295,19 +381,28 @@ class WeekManager {
         const day = Grid.PARSE_DAY(grid);
         const week = Grid.WORDLE_WEEK(day);
 
-        let form = new FormData();
-        console.warn("sending request " + count);
+        this._lastSave = {
+            user: user,
+            grid: grid,
+            day: day.toString(),
+            week: week.toString(),
+            count: count.toString()
+        }
 
-        form.append("user", user);
-        form.append("grid", grid);
-        form.append("day", day.toString());
-        form.append("week", week.toString());
-        form.append("count", count.toString());
+        // let form = new FormData();
+        // console.warn("sending request " + count);
 
-        return form;
+        // form.append("user", user);
+        // form.append("grid", grid);
+        // form.append("day", day.toString());
+        // form.append("week", week.toString());
+        // form.append("count", count.toString());
+        // return form;
+
+        return this._createForm(this._lastSave);
     }
 
-    _prepareDir(dir) {
+    _prepareDirection(dir) {
         let form = new FormData();
         form.append("week", this._at.toString());
         const nWeek = this._getWeekFrom(dir);

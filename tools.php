@@ -5,6 +5,11 @@ function getExpectedVersion()
     return 5;
 }
 
+//only half of the delay will be used client side
+function getDeleteDelay(){
+    return 60;
+}
+
 function getNextWeek()
 {
     $week = getWeekAfter($_POST["week"]);
@@ -40,7 +45,6 @@ function getWeek($week, $count)
     $path = "grids/$week";
     $r = new \stdClass();
     $r->msg = [];
-    $r->count = countFiles($path);
     $r->to = "clientGetWeek";
     if ($week == null || !file_exists($path) || countFiles($path) == intval($count)) {
         if ($week == null) {
@@ -49,14 +53,15 @@ function getWeek($week, $count)
 
         if (!file_exists($path)) {
             $r->to = "clientGetfile";
-        }
-
-        if (countFiles($path) == intval($count)) {
+        } else if (countFiles($path) == intval($count)) {
+            $r->count = countFiles($path);
             $r->to = "clientGetno";
         }
 
         return $r;
     }
+
+    $r->count = countFiles($path);
 
     $it = new \FilesystemIterator($path, FilesystemIterator::SKIP_DOTS);
     foreach ($it as $day) {
@@ -234,6 +239,41 @@ function countFiles($path)
     return $size;
 }
 
+function deleteGrid()
+{
+    $day = $_POST["day"];
+    $week = $_POST["week"];
+    $user = strtolower($_POST["user"]);
+    $count = $_POST["count"];
+    $time = intval($_POST["time"]);
+    $name = "grids/$week/$day/$user";
+
+    $r = new \stdClass();
+    $r->to = "client";
+
+    $modTime = filemtime($name);
+    $cTime = time();
+    if ($modTime == $time && $cTime - $time < getDeleteDelay()) {
+        unlink($name);
+        if (countFiles("grids/$week/$day") == 0) {
+            rmdir("grids/$week/$day");
+            if (countFiles("grids/$week") == 0) {
+                rmdir("grids/$week");
+            }
+        }
+        $r->msg = getWeek($week, $count);
+    } else {
+        if ($cTime - $time >= getDeleteDelay()) {
+            $r->msg = "Delete Time Expired";
+        } else {
+            err("" . $_SERVER['REMOTE_ADDR'] . " attempted to delete $name, incorrect mod time $time");
+        }
+
+        $r->fail = true;
+    }
+    return $r;
+}
+
 function saveGrid()
 {
     $err = errCheck();
@@ -275,6 +315,7 @@ function saveGrid()
         $r = new \stdClass();
         $r->to = "clientxx";
         $r->msg = getWeek($week, $count);
+        $r->time = filemtime($name);
         return $r;
     }
     $r = new \stdClass();

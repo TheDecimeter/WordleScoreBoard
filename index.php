@@ -93,12 +93,14 @@
 
 <body>
     <br><br>
+    <span id="preInstruction"></span>
     <div>
         <form id="form">
             <b>Submit:</b> <br><br>
             <input name="user" id="user" placeholder="user name" type="text"><br>
             <textarea name="grid" id="grid" placeholder="paste grid here" cols="30" rows="10"></textarea><br>
             <input id="submitButton" type="button" value="Submit" onclick="ScoreBoard.addGrid('user','grid')">
+            <input id="deleteButton" type="button" value="">
 
             <br><br>
 
@@ -107,17 +109,8 @@
         <br><br><br>
     </div>
 
-    <!-- <input type="file" id="file-selector" multiple> -->
-<script>
-//   const fileSelector = document.getElementById('file-selector');
-//   fileSelector.addEventListener('change', (event) => {
-//     // const fileList = event.target.files;
-//     // console.log(fileList);
-// process(event);
-//   });
-</script>
+    <span id="postInstruction"></span>
 
-    <!-- end -->
     <div class = "header">
     <span class="title">Score Board</span>
     <span class ="pages">
@@ -148,33 +141,40 @@
 include_once "tools.php";
 
 //if you see PHP errors here, you may need to remove h.txt from /grids
+$deleteDelay = strval(floor(getDeleteDelay() / 2));
+$expectedVersion = strval(getExpectedVersion());
 $thisWeek = getRecentWeek();
 $weekData = getWeek($thisWeek, 0);
 $thisWeekJSON = json_encode($weekData);
-$bool = count($weekData->msg) < 2;
+$onlyOneDay = count($weekData->msg) < 2;
 $lastWeek = getWeekBefore($thisWeek);
 $lastWeekJSON = json_encode(getWeek($lastWeek, 0));
-echo "</script>\n<script>\n";
-echo "var thisWeek = " . $thisWeekJSON . ";\n";
 
-if ($bool) {
-    echo "var lastWeek = " . $lastWeekJSON . ";\n";
+echo "</script>\n<script>\n";
+
+echo "const deleteDelay = " . $deleteDelay . ";\n";
+echo "const expectedVersion = " . $expectedVersion . ";\n";
+echo "const thisWeek = " . $thisWeekJSON . ";\n";
+
+if ($onlyOneDay) {
+    echo "const lastWeek = " . $lastWeekJSON . ";\n";
 } else {
-    echo "var lastWeek = null;\n";
+    echo "const lastWeek = null;\n";
 }
 ?>
         //parse json, go through girds, set name and date
         console.log("data");
         console.log(thisWeek);
         console.log(lastWeek);
-        const expectedVersion = 5;
-        // updateBoard(jsonData.msg);
+        
         ScoreBoard = new WeekManager(expectedVersion, thisWeek, lastWeek,
          document.getElementById("table"),
          document.getElementById("weekDisplay"),
          document.getElementById("submitButton"),
          document.getElementById("prevButton"),
-         document.getElementById("nextButton"));
+         document.getElementById("nextButton"),
+         document.getElementById("deleteButton"),
+         deleteDelay);
 
 
          function process(event){
