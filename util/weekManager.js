@@ -220,7 +220,7 @@ class WeekManager {
             this._createEmptyTable(week, dayCount);
 
         let y = 0;
-        // let maxGridWidth = 0;
+        
         let maxGridWidths = [];
         let add = (n, i) => {
             if (maxGridWidths[i] == undefined)
@@ -232,12 +232,7 @@ class WeekManager {
             let x = 0;
             for (const grid of user.grids(this._at)) {
                 if (grid != null) {
-                    // if (maxGridWidth < grid.gridPix()) {
-                    //     console.log(`setting max grid width: ${grid.gridPix()} for ${grid._wordleDay}`)
-                    //     maxGridWidth = grid.gridPix();
-                    // }
                     add(grid.gridPix(), x);
-                    // maxGridWidth = Math.max(maxGridWidth, grid.gridPix());
                     document.getElementById(this._cellID(x, y)).innerHTML = grid.draw();
                 }
                 else

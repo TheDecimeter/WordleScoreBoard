@@ -13,9 +13,9 @@ class Grid {
     constructor(grid, day = null) {
         this._gridString = Grid.FIX(grid, day);
         this._score = Grid.PARSE_SCORE(this._gridString);
-        this._wordleDay = Grid.PARSE_DAY(this._gridString);
-        this._wordleWeek = Grid.WORDLE_WEEK(this._wordleDay);
-        this._wordleDate = Grid.WORDLE_DATE(this._wordleDay);
+        this._wordleNum = Grid.PARSE_DAY(this._gridString);
+        this._wordleWeek = Grid.WORDLE_WEEK(this._wordleNum);
+        this._wordleDate = Grid.WORDLE_DATE(this._wordleNum);
         this._gridPix = Grid.CALC_WIDTH_PX(this._gridString);
     }
 

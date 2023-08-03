@@ -45,7 +45,7 @@ class User {
 
     addGrid(grid) {
         this._grids.push(new Grid(grid));
-        this._grids.sort((a, b) => a._wordleDate.getTime() - b._wordleDate.getTime());
+        this._grids.sort((a, b) => a._wordleNum - b._wordleNum);
     }
 
     getWordleWeek() {
@@ -106,11 +106,11 @@ class User {
     }
 
     earliestDay() {
-        return this._grids[0]._wordleDay;
+        return this._grids[0]._wordleNum;
     }
 
     latestDay() {
-        return this._grids[this._grids.length - 1]._wordleDay;
+        return this._grids[this._grids.length - 1]._wordleNum;
     }
 
     /**
@@ -125,11 +125,11 @@ class User {
         let i = 0;
         let unique = new Set();
         let grids = this._grids.filter(g => {
-            if (unique.has(g._wordleDay)) {
-                console.log("filtering " + this._user + " " + g._wordleDay);
+            if (unique.has(g._wordleNum)) {
+                console.log("filtering " + this._user + " " + g._wordleNum);
                 return false;
             }
-            unique.add(g._wordleDay);
+            unique.add(g._wordleNum);
             return true;
         });
 
@@ -143,7 +143,7 @@ class User {
                     }
                 if (weekFrom != null) {
                     dayAt++;
-                    if (grids[i]._wordleDay != dayAt)
+                    if (grids[i]._wordleNum != dayAt)
                         return {
                             done: false,
                             value: null
