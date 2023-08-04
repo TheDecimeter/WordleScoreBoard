@@ -251,6 +251,7 @@ class WeekManager {
             if (maxWidth)
                 for (let yy = 0; yy < y; ++yy) {
                     document.getElementById(this._cellID(xx, yy)).style.minWidth = `${maxWidth}px`;
+                    document.getElementById(this._cellID(xx, yy)).style.maxWidth = `${maxWidth}px`;
                 }
         }
 

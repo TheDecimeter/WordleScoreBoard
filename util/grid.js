@@ -134,7 +134,6 @@ class Grid {
     }
 
     static TODAY(date = new Date()) {
-        const today = new Date();
         return new Date(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
@@ -185,11 +184,19 @@ class Grid {
             return "";
         while (grid.includes("  "))
             grid = grid.replaceAll("  ", " ");
+
         grid = grid.replaceAll("\r", "");
-        grid = grid.replace("\nnyt.com/wordle‌", "");
-        grid = grid.replace("\nnyt.com/wordle", "");
-        grid = grid.replace(`\n#phrazle\n\nhttps://solitaired.com/phrazle`, "");
-        let firstLine = this.GET_STATS_LINE(grid);
+        const firstLine = this.GET_STATS_LINE(grid);
+        
+        // @ts-ignore
+        if (window.gridClean)
+            // @ts-ignore
+            grid = window.gridClean(grid, firstLine);
+        else {
+            grid = grid.replace("\nnyt.com/wordle‌", "");
+            grid = grid.replace("\nnyt.com/wordle", "");
+            grid = grid.replace(`\n#phrazle\n\nhttps://solitaired.com/phrazle`, "");
+        }
 
         //remove duplicate line breaks between grid lines (phrazle)
         let gridLines = grid.split("\n")
@@ -216,7 +223,6 @@ class Grid {
 
     static GET_STATS_LINE(grid) {
         let g = grid.split("\n");
-        let score = 0;
         for (const line of g) {
             const l = line.trim();
             if (this.PARSE_SCORE(l) != 0 &&
@@ -283,7 +289,6 @@ class Grid {
      * @returns true if the character at the index is a square
      */
     static IS_SQUARE_CHAR(c, i) {
-        const x = c.includes("🟩", i);
         for (const s of this.SQUARES) {
             if (c.includes(s, i))
                 return true;
