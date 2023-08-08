@@ -104,11 +104,11 @@ class Grid {
 
 
     // @ts-ignore
-    static _DAY_OFFSET = window.dayOffset ? window.dayOffset : 5;
+    static _DAY_OFFSET = window.dayOffset ? window.dayOffset : null;
     // @ts-ignore
-    static _DAY = window.firstDay ? window.firstDay : 226;
+    static _DAY = window.firstDay ? window.firstDay : 758;
     // @ts-ignore
-    static _DATE = window.firstDate ? new Date(window.firstDate) : new Date(2022, 0, 31);
+    static _DATE = window.firstDate ? new Date(window.firstDate) : new Date(2023, 6, 17);
     // @ts-ignore
     static TIMES_PER_DAY = window.timesPerDay ? window.timesPerDay : 1;
 
@@ -126,6 +126,8 @@ class Grid {
     }
 
     static WORDLE_WEEK(wordleDay = this.WORDLE_FROM_DATE()) {
+        if (this._DAY_OFFSET == null)
+            this._DAY_OFFSET = this.FIND_WORDLE_WEEK_OFFSET(this._DAY);
         const offsetDay = wordleDay + this._DAY_OFFSET;
         const normalizedOffset = Math.floor((offsetDay) / (7 * this.TIMES_PER_DAY))
         const returnToWeek = (7 * this.TIMES_PER_DAY);
@@ -151,7 +153,7 @@ class Grid {
             this._DAY_OFFSET = tmp;
         }
         console.error(`no offset found`)
-        return -1;
+        return 0;
     }
 
     static TODAY(date = new Date()) {
