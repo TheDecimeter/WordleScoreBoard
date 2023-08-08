@@ -18,6 +18,6 @@ Setup Steps:
     - `window.timesPerDay` = a number representing the times per day the game is played (eg, Wordle would be `1`, Phrazle might be `2`)
     - `window.validateGrid` = a function returning true if a grid is valid. Two arguments are provided, the grid and the stats line. (eg, `(g,s) => !s.includes("Wordle");` would not submit a grid if it contains the word "Wordle" in it's stats line)
     - `window.gridClean` = a function to clean a cleaned up grid string (eg, `(g,s) => g.replace("\n#phrazle\n", "");` can remove some clutter from a phrazle grid)
- - There are also a couple ids easy to add to
-   - `document.getElementById("preInstruction")` a span prior to the submit area
-   - `document.getElementById("postInstruction")` a span after to the submit area
+  - There are also a couple ids easy to add to
+    - `document.getElementById("preInstruction")` a span prior to the submit area
+    - `document.getElementById("postInstruction")` a span after to the submit area
