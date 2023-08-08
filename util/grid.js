@@ -126,11 +126,32 @@ class Grid {
     }
 
     static WORDLE_WEEK(wordleDay = this.WORDLE_FROM_DATE()) {
-        const offsetDay = wordleDay - this._DAY_OFFSET;
+        const offsetDay = wordleDay + this._DAY_OFFSET;
         const normalizedOffset = Math.floor((offsetDay) / (7 * this.TIMES_PER_DAY))
         const returnToWeek = (7 * this.TIMES_PER_DAY);
         const weekDays = normalizedOffset * returnToWeek
-        return weekDays + this._DAY_OFFSET;
+        return weekDays - this._DAY_OFFSET;
+    }
+
+    /**
+     * Helper function to determine what the day offset should be
+     * @param {number} firstDayNumber - the number of teh wordle grid which is the first of the week
+     * @returns the wordle offset or -1 if it can't be found
+     */
+    static FIND_WORDLE_WEEK_OFFSET(firstDayNumber) {
+        const tmp = this._DAY_OFFSET;
+        try {
+            for (let day = 0; day < this.TIMES_PER_DAY * 7; ++day) {
+                this._DAY_OFFSET = day;
+                if (this.WORDLE_WEEK(firstDayNumber) == firstDayNumber)
+                    return day;
+            }
+        }
+        finally {
+            this._DAY_OFFSET = tmp;
+        }
+        console.error(`no offset found`)
+        return -1;
     }
 
     static TODAY(date = new Date()) {
@@ -187,7 +208,7 @@ class Grid {
 
         grid = grid.replaceAll("\r", "");
         const firstLine = this.GET_STATS_LINE(grid);
-        
+
         // @ts-ignore
         if (window.gridClean)
             // @ts-ignore
