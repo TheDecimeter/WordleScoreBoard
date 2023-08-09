@@ -21,3 +21,21 @@ Setup Steps:
   - There are also a couple ids easy to add to
     - `document.getElementById("preInstruction")` a span prior to the submit area
     - `document.getElementById("postInstruction")` a span after to the submit area
+
+Example "values.js" for Phrazle Grids from https://solitaired.com/phrazle
+```
+window.firstDay = 951;
+window.firstDate = "8/07/2023";
+window.timesPerDay = 2;
+document.title = "Phrazle Board"
+/**
+ * @param {string} grid - whole grid
+ * @param {string} stats - stats line
+ * @returns true if grid is to be submitted
+ */
+window.validateGrid = (grid, stats) => {
+    if (stats.includes("Wordle"))
+        return window.confirm("This might be a wordle grid, not Phrazle. Are you sure you wish to submit?");
+    return true;
+}
+```
