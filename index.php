@@ -126,9 +126,9 @@
         </table>
     </div>
     <script src="values.js"></script>
-    <script src="util/comm.js?4"></script>
+    <script src="util/comm.js?"></script>
     <script src="util/grid.js?4"></script>
-    <script src="util/user.js?4"></script>
+    <script src="util/user.js?5"></script>
     <script src="util/week.js?4"></script>
     <script src="util/weekManager.js?4"></script>
     <script src="util/util.js?4"></script>
