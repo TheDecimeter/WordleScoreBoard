@@ -114,7 +114,7 @@ class Grid {
 
     static WORDLE_DATE(wordleDay) {
         const days = Math.floor((wordleDay - this._DAY) / this.TIMES_PER_DAY);
-        const r = new Date();
+        const r = new Date(this.START_DAY());
         r.setDate(this.START_DAY().getDate() + days);
         return r;
     }
