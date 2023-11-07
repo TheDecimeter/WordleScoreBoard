@@ -2,7 +2,7 @@
 
 function getExpectedVersion()
 {
-    return 7;
+    return 9;
 }
 
 //only half of the delay will be used client side
