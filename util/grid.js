@@ -113,8 +113,10 @@ class Grid {
     static TIMES_PER_DAY = window.timesPerDay ? window.timesPerDay : 1;
 
     static WORDLE_DATE(wordleDay) {
-        const days = Math.floor((wordleDay - this._DAY) / this.TIMES_PER_DAY) * 86400000;
-        return new Date(this.START_DAY().getTime() + days);
+        const days = Math.floor((wordleDay - this._DAY) / this.TIMES_PER_DAY);
+        const r = new Date();
+        r.setDate(this.START_DAY().getDate() + days);
+        return r;
     }
 
     static WORDLE_FROM_DATE(day = this.TODAY()) {
