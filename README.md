@@ -22,7 +22,7 @@ Setup Steps:
     - `document.getElementById("preInstruction")` a span prior to the submit area
     - `document.getElementById("postInstruction")` a span after to the submit area
 
-Example "values.js" for Phrazle Grids from https://solitaired.com/phrazle
+Example "values.js" for Phrazle Grids from https://solitaired.com/phrazle (NOTE: solitarid does not properly adjust with daylight savings time. So the below configuration will likely be incorrect)
 ```
 window.firstDay = 951;
 window.firstDate = "8/07/2023";
