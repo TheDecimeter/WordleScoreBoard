@@ -22,7 +22,7 @@ Setup Steps:
     - `document.getElementById("preInstruction")` a span prior to the submit area
     - `document.getElementById("postInstruction")` a span after to the submit area
 
-Example "values.js" for Phrazle Grids from https://solitaired.com/phrazle (NOTE: solitarid does not properly adjust with daylight savings time. So the below configuration will likely be incorrect)
+Example "values.js" for Phrazle Grids from https://solitaired.com/phrazle (WARNING: solitaired does not properly adjust with daylight savings time. So the below configuration will likely be incorrect. Also, this means on the week after daylights saving time, you will have to create a new instance with updated values.js. Other games (like nytimes' wordle seem to handle daylight savings time just fine)
 ```
 window.firstDay = 951;
 window.firstDate = "8/07/2023";
