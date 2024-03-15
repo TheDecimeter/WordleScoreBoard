@@ -86,7 +86,12 @@ class Grid {
         return r;
     }
 
-
+    /**
+     * 
+     * @param {string} grid 
+     * @param {number} defaultDay 
+     * @returns 
+     */
     static PARSE_DAY(grid, defaultDay = this.WORDLE_FROM_DATE()) {
         if (grid.includes("\n"))
             grid = this.GET_STATS_LINE(grid);
@@ -96,7 +101,7 @@ class Grid {
         const day = t[1];
         if (!day)
             return defaultDay;
-        const r = parseInt(day);
+        const r = parseInt(day.replace(".", "").replace(",", ""));
         if (isNaN(r))
             return defaultDay;
         return r;
