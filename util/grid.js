@@ -109,13 +109,13 @@ class Grid {
 
 
     // @ts-ignore
-    static _DAY_OFFSET = window.dayOffset ? window.dayOffset : null;
+    static _DAY_OFFSET = window.dayOffset != null ? window.dayOffset : null;
     // @ts-ignore
-    static _DAY = window.firstDay ? window.firstDay : 758;
+    static _DAY = window.firstDay != null ? window.firstDay : 758;
     // @ts-ignore
-    static _DATE = window.firstDate ? new Date(window.firstDate) : new Date(2023, 6, 17);
+    static _DATE = window.firstDate != null ? new Date(window.firstDate) : new Date(2023, 6, 17);
     // @ts-ignore
-    static TIMES_PER_DAY = window.timesPerDay ? window.timesPerDay : 1;
+    static TIMES_PER_DAY = window.timesPerDay != null ? window.timesPerDay : 1;
 
     static WORDLE_DATE(wordleDay) {
         const days = Math.floor((wordleDay - this._DAY) / this.TIMES_PER_DAY);
