@@ -187,7 +187,7 @@ class WeekManager {
     }
 
     _deleteLatestGrid() {
-        const delData = this._createForm(this._lastSave);
+        const delData = createForm(this._lastSave);
 
         this._updateGrid("delete", delData, (d) => {
             console.log('delete data returned');
@@ -220,7 +220,7 @@ class WeekManager {
             this._createEmptyTable(week, dayCount);
 
         let y = 0;
-        
+
         let maxGridWidths = [];
         let add = (n, i) => {
             if (maxGridWidths[i] == undefined)
@@ -338,25 +338,13 @@ class WeekManager {
     }
 
     /**
-     * 
-     * @param {any} fromObj - the object to turn into a form
-     * @returns a new form object
-     */
-    _createForm(fromObj) {
-        const r = new FormData();
-        for (const m in fromObj)
-            r.append(m, fromObj[m].toString());
-        return r;
-    }
-
-    /**
      * add a new grid, and send to the server for an update
      * @param {string} userFieldId the id of the text area which contains the user id
      * @param {string} gridFieldId the id of the text area which contains the grid
      */
     _prepareGrid(userFieldId, gridFieldId) {
         const user = User.ENCODE(/** @type{HTMLInputElement} */($(userFieldId)).value);
-        const grid = this._gridValidation(/** @type{HTMLInputElement} */($(gridFieldId)));
+        const grid = gridValidation(/** @type{HTMLInputElement} */($(gridFieldId)));
         if (grid == null)
             return;
         if (user.length > 0)
@@ -395,7 +383,7 @@ class WeekManager {
         // form.append("count", count.toString());
         // return form;
 
-        return this._createForm(this._lastSave);
+        return createForm(this._lastSave);
     }
 
     _prepareDirection(dir) {

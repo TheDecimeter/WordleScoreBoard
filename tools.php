@@ -78,6 +78,9 @@ function getDay($week, $day)
     $path = "grids/$week/$day";
     $it = new \FilesystemIterator($path);
     foreach ($it as $file) {
+        if(is_dir($file) == true){
+            continue;
+        }
         $f = $file->openFile("r");
         if (!$f) {
             array_push($r->$day, "failed file");

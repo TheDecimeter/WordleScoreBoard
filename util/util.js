@@ -39,3 +39,35 @@ function decode(val) {
     r = r.replaceAll("%3b", ";");
     return decodeURI(r);
 }
+
+/**
+ * Validates the grid input.
+ * @param {HTMLInputElement} gridFieldId - The input element for the grid.
+ * @returns {string|null} - The validated grid or null if it's invalid.
+ */
+function gridValidation(gridFieldId) {
+    const wellFormedGrid = Grid.FIX(gridFieldId.value)
+
+    // @ts-ignore
+    if (window.validateGrid) {
+        const firstLine = Grid.GET_STATS_LINE(wellFormedGrid);
+        // @ts-ignore
+        if (!window.validateGrid(wellFormedGrid, firstLine))
+            return null;
+    }
+
+    return wellFormedGrid;
+}
+
+/**
+ * Creates a FormData object from an object.
+ * @param {any} data - The data object to convert.
+ * @returns {FormData} - The FormData object.
+ */
+function createForm(data) {
+    const form = new FormData();
+    for (let key in data) {
+        form.append(key, data[key].toString());
+    }
+    return form;
+}
