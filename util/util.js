@@ -1,8 +1,7 @@
-
 /**
- * 
+ * Get an HTML element
  * @param {string | HTMLElement} elem the string id or html element
- * @returns htmlElement
+ * @returns {HTMLElement} the HTML element.
  */
 function $(elem) {
     if (typeof elem == "string" || elem instanceof String)
@@ -14,39 +13,21 @@ function $(elem) {
 /**
  * Get the value of an HTMLInputElement
  * @param {string | HTMLElement} elem the string id or html element
- * returns some string value
+ * @returns {any} some string value, or null if elem isn't a HTMLInputElement
  */
 function val(elem) {
-    return /** @type{HTMLInputElement} */ ($(elem)).value;
-}
-
-
-function encode(val) {
-    let r = encodeURI(val).replaceAll("-", "%2d");
-    r = r.replaceAll("=", "%3d");
-    r = r.replaceAll("?", "%3f");
-    r = r.replaceAll("&", "%26");
-    r = r.replaceAll(";", "%3b");
-    return r.replaceAll("/", "%2f");
-}
-
-function decode(val) {
-    let r = val.replaceAll("%2f", "/");
-    r = r.replaceAll("%2d", "-");
-    r = r.replaceAll("%3d", "=");
-    r = r.replaceAll("%3f", "?");
-    r = r.replaceAll("%26", "&");
-    r = r.replaceAll("%3b", ";");
-    return decodeURI(r);
+    if (!elem)
+        return null;
+    return /** @type{HTMLInputElement} */($(elem)).value;
 }
 
 /**
  * Validates the grid input.
- * @param {HTMLInputElement} gridFieldId - The input element for the grid.
+ * @param {string} gridFieldValue - The input element for the grid.
  * @returns {string|null} - The validated grid or null if it's invalid.
  */
-function gridValidation(gridFieldId) {
-    const wellFormedGrid = Grid.FIX(gridFieldId.value)
+function gridValidation(gridFieldValue) {
+    const wellFormedGrid = Grid.FIX(gridFieldValue)
 
     // @ts-ignore
     if (window.validateGrid) {
@@ -70,4 +51,44 @@ function createForm(data) {
         form.append(key, data[key].toString());
     }
     return form;
+}
+
+/**
+ * get a list of usernames atted in a string of text
+ * @param {string} text 
+ * @returns {string[]} the list of user names found in the text
+ */
+function extractUsernames(text) {
+    // Regex matches '@' followed by letters, numbers, or underscores
+    const regex = /\B@[a-zA-Z0-9_]+/g;
+    const matches = text.match(regex);
+
+    // remove the @ symbol
+    return matches ? matches.map(username => username.substring(1)) : [];
+}
+
+/**
+ * get a list of commments for the user's grid
+ * @param {string} userName_lower the username we're looking for in the comments
+ * @param {CommentResponse[]} comments the comments
+ * @returns {CommentResponse[]} a list of comments for the specified user 
+ */
+function usersComments(userName_lower, comments) {
+    const r = comments.filter(c => c.name.startsWith(userName_lower));
+    return r;
+}
+
+/**
+ * get a list of commments directed at a user
+ * @param {string} userName_lower the username we're looking for in the comments
+ * @param {CommentResponse[]} comments the comments
+ * @returns {CommentResponse[]} a list of comments for the specified user 
+ */
+function userDirectedComments(userName_lower, comments) {
+    const r = comments.filter(c => {
+        extractUsernames(c.message)
+            .map(n => n.toLowerCase())
+            .includes(userName_lower)
+    })
+    return r;
 }

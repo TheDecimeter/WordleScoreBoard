@@ -2,15 +2,16 @@
 class User {
     /**
      * 
-     * @param {string} user username
-     * @param {{"grid":string, "day":string} []} grids grid data for all of the user grids
+     * @param {UserStruct} USER username
      */
-    constructor(user, grids) {
+    constructor(USER) {
+        const user = USER.user;
+        const grids = USER.days;
         /** @type Grid[] */
         this._grids = [];
         if (Array.isArray(grids))
             for (const g of grids)
-                this._grids.push(new Grid(g.grid, g.day));
+                this._grids.push(new Grid(g));
         // else
         //     this._grids.push(new Grid(grids.grid, grids.day));
 
@@ -18,10 +19,16 @@ class User {
         this._grids.sort((a, b) => a._wordleNum - b._wordleNum);
     }
 
+    /**
+     * @param {string} name
+     */
     static UNIFORM(name) {
         return User.NORMALIZE_NAME(User.DECODE(name).trim());
     }
 
+    /**
+     * @param {string | null} n
+     */
     static NORMALIZE_NAME(n) {
         if (n == null || n.length == 0)
             return "";
@@ -43,6 +50,9 @@ class User {
         return "<b>" + r.trim() + "</b>";
     }
 
+    /**
+     * @param {string} grid
+     */
     addGrid(grid) {
         this._grids.push(new Grid(grid));
         this._grids.sort((a, b) => a._wordleNum - b._wordleNum);
@@ -67,6 +77,10 @@ class User {
         return score;
     }
 
+    /**
+     * @param {number} averageScore
+     * @param {number} days
+     */
     score(averageScore, days) {
         const playedDays = this._grids.length;
         if (playedDays == 0)
@@ -76,6 +90,10 @@ class User {
         return (this.totalScore() + averageScore * (days - playedDays)) / days;
     }
 
+    /**
+     * @param {number} averageScore
+     * @param {number} days
+     */
     drawMissed(averageScore, days) {
         const playedDays = this._grids.length;
         if (playedDays == 0)
@@ -92,6 +110,10 @@ class User {
         }
         return "<span class = 'missedTxt'>" + prefix + "</span><BR>" + Grid.DRAW_EMPTY(score, ["\t"]).replaceAll("\t", "<span class = 'boxGeneric boxM'></span>");
     }
+    /**
+     * @param {any} averageScore
+     * @param {any} days
+     */
     drawFinal(averageScore, days) {
         return Grid.DRAW_EMPTY(this.score(averageScore, days), ["\t"]).replaceAll("\t", "<span class = 'boxGeneric boxM'></span>");
     }
@@ -114,7 +136,7 @@ class User {
     }
 
     /**
-     * @param weekFrom {number} the week start number, if specified this iterator will return days
+     * @param weekFrom {number | null} the week start number, if specified this iterator will return days
      * with nulls in place of missing days
      * @returns an iterator to cycle through grids from the earliest to the latest
      */

@@ -5,90 +5,7 @@
     <title>
         Leader Board
     </title>
-    <style>
-        .header {
-            display : flex;
-            align-items : center;
-        }
-        .title {
-            font-size: 200%;
-            font-weight:150%;
-            display: inline-block;
-        }
-        .pages {
-            margin-left:2em;
-            vertical-align: middle;
-            display: inline-block;
-        }
-        .cell {
-            border: 1px solid black;
-            border-radius: 10px;
-            padding: 12px;
-            min-width: 130px;
-        }
-
-        .missedTxt {
-            color : lightgray;
-        }
-
-        .invisible{
-            opacity: 0;
-        }
-
-        .boxGeneric {
-            background-color: transparent;
-            text-align: center;
-            font-family: Monospace;
-            padding: 6px;
-            width: 10px;
-            height: 10px;
-            display: inline-block;
-            border: 1px solid black;
-            border-radius: 10%;
-            margin: 1px;
-        }
-
-        .boxTrans{
-            opacity: 0;
-        }
-
-        .boxM {
-            background-color: white;
-            border: 1px solid lightgray;
-        }
-
-        .boxY {
-            background-color: yellow;
-        }
-
-        .boxG {
-            background-color: green;
-        }
-
-        .boxW {
-            background-color: white;
-        }
-
-        .boxP{
-            background-color: purple;
-        }
-
-        .boxBr{
-            background-color: brown;
-        }
-
-        .boxR{
-            background-color: red;
-        }
-
-        .boxBl{
-            background-color: blue;
-        }
-
-        .boxO{
-            background-color: orange;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -126,12 +43,13 @@
         </table>
     </div>
     <script src="values.js"></script>
-    <script src="util/comm.js?"></script>
-    <script src="util/grid.js?6"></script>
-    <script src="util/user.js?5"></script>
-    <script src="util/week.js?4"></script>
-    <script src="util/weekManager.js?4"></script>
-    <script src="util/util.js?4"></script>
+    <script src="util/comm.js"></script>
+    <script src="util/cmnt.js"></script>
+    <script src="util/grid.js?7"></script>
+    <script src="util/user.js?7"></script>
+    <script src="util/week.js?7"></script>
+    <script src="util/weekManager.js?7"></script>
+    <script src="util/util.js?7"></script>
     <script>
 
         //set data

@@ -32,7 +32,7 @@ class WeekManager {
 
         /** @type {Week} */
         this._currentWeek = null;
-        this._lastSave = {};
+        this._lastSave = /**@type{LastSave}*/({});
 
         this._wordleDate = wordleDate;
         this._display = display;
@@ -57,12 +57,18 @@ class WeekManager {
         this.drawGrid();
     }
 
+    /**
+     * @param {any[]} weekData
+     */
     _setWeek(weekData) {
         const week = new Week(weekData);
         this._weeks.set(week.getWordleWeek(), week);
         return week;
     }
 
+    /**
+     * @param {number} week
+     */
     _delWeek(week) {
         this._weeks.delete(week);
     }
@@ -221,8 +227,11 @@ class WeekManager {
 
         let y = 0;
 
+        /**
+         * @type {any[]}
+         */
         let maxGridWidths = [];
-        let add = (n, i) => {
+        let add = (/** @type {number} */ n, /** @type {number} */ i) => {
             if (maxGridWidths[i] == undefined)
                 maxGridWidths[i] = n;
             else
@@ -233,14 +242,14 @@ class WeekManager {
             for (const grid of user.grids(this._at)) {
                 if (grid != null) {
                     add(grid.gridPix(), x);
-                    document.getElementById(this._cellID(x, y)).innerHTML = grid.draw();
+                    $(this._cellID(x, y)).innerHTML = grid.draw();
                 }
                 else
-                    document.getElementById(this._cellID(x, y)).innerHTML = user.drawMissed(averageScore, dayCount);
+                    $(this._cellID(x, y)).innerHTML = user.drawMissed(averageScore, dayCount);
                 x++;
             }
             for (; x < dayCount; ++x) {
-                document.getElementById(this._cellID(x, y)).innerHTML = user.drawMissed(averageScore, dayCount);
+                $(this._cellID(x, y)).innerHTML = user.drawMissed(averageScore, dayCount);
             }
             y++;
         }
@@ -280,7 +289,7 @@ class WeekManager {
         while (this._display.firstChild)
             this._display.removeChild(this._display.lastChild);
 
-        let userCount = week.users().length;
+        let userCount = week.userLength();
         for (let y = -1; y < userCount; ++y) {
             const row = document.createElement("TR");
             this._display.appendChild(row);
@@ -343,8 +352,8 @@ class WeekManager {
      * @param {string} gridFieldId the id of the text area which contains the grid
      */
     _prepareGrid(userFieldId, gridFieldId) {
-        const user = User.ENCODE(/** @type{HTMLInputElement} */($(userFieldId)).value);
-        const grid = gridValidation(/** @type{HTMLInputElement} */($(gridFieldId)));
+        const user = User.ENCODE(val(userFieldId));
+        const grid = gridValidation(val(gridFieldId));
         if (grid == null)
             return;
         if (user.length > 0)
@@ -386,6 +395,9 @@ class WeekManager {
         return createForm(this._lastSave);
     }
 
+    /**
+     * @param {number} dir
+     */
     _prepareDirection(dir) {
         let form = new FormData();
         form.append("week", this._at.toString());

@@ -1,5 +1,10 @@
 //class to hold each grid
+
+
 class Week {
+    /**
+     * @param {WeekResponse | null} days
+     */
     constructor(days = null) {
         //user data is a list of days, each data has users keyed to grids
 
@@ -10,26 +15,30 @@ class Week {
         //         this._users.set(u, new User(u, userData[u]));
         // }
 
-        /** @type{Map<string,{user:string, days:{grid:string, day:string}[]}>} */
+        /** @type{Map<string, UserStruct>} */
         let grids = new Map();
-        for (const dayObj of days) {
-            for (const day in dayObj) {
-                for (const user of dayObj[day]) {
-                    for (const userName in user) {
-                        const key=User.UNIFORM(userName);
-                        if (!grids.has(key))
-                            grids.set(key, {user: userName, days:[]});
-                        grids.get(key).days.push({ grid: user[userName], day: day });
-                        // this._users.set(user, userGrid[user]);
-                        break;
-                    }
-                }
-                break;
-            }
-        }
+        if (days != null)
+            for (const dayObj of days) {
+                /** @type{CommentResponse[]} */
+                let comments = dayObj.comments || [];
+                for (const day in dayObj) {
+                    if (day != "comments")
+                        for (const user of dayObj[day]) {
+                            for (const userName in user) {
+                                const userName_lower = userName.toLowerCase();
+                                const userName_normalized = User.UNIFORM(userName);
+                                if (!grids.has(userName_normalized))
+                                    grids.set(userName_normalized, { user: userName, days: [] });
 
-        for (const user of grids) {
-            const u = new User(user[1].user, user[1].days);
+                                grids.get(userName_normalized).days.push({ grid: user[userName], day: day, comments: usersComments(userName_lower, comments) });
+                                break;
+                            }
+                        }
+                }
+            }
+
+        for (const user of grids.values()) {
+            const u = new User(user);
             this._users.set(u.user(), u);
         }
     }
@@ -48,7 +57,15 @@ class Week {
      * @returns 
      */
     addGrid(user, grid) {
-        const u = new User(user, [{ grid: grid, day: "" + Grid.WORDLE_FROM_DATE() }])
+        const uStruct = {
+            user: user,
+            days: [{
+                comments: /**@type{CommentResponse[]}*/([]),
+                grid: grid,
+                day: "" + Grid.WORDLE_FROM_DATE()
+            }]
+        }
+        const u = new User(uStruct)
         if (this._users.has(u.user()))
             this._users.get(u.user()).addGrid(grid);
         else {
@@ -73,16 +90,18 @@ class Week {
 
     latestDay() {
         let day = Number.MIN_SAFE_INTEGER;
-        for (const user of this._users.values())
-            if (user.latestDay() > day)
-                day = user.latestDay();
+        for (const user of this._users.values()) {
+            const latest = user.latestDay();
+            if (latest > day)
+                day = latest;
+        }
         return day;
     }
 
     getWordleWeek() {
         if (this._users.size == 0) {
             console.error("Unable to get week number if you have no weeks");
-            return null
+            return -1
         }
         for (const u of this._users.values()) {
             console.log(u)
@@ -93,8 +112,11 @@ class Week {
         return -1;
     }
 
+    userLength() {
+        return this._users.size;
+    }
     /**
-     * @returns an iterator to cycle through each user
+     * @returns {Iterable<User>} an iterator to cycle through each user
      */
     users() {
         let i = 0;
@@ -104,18 +126,17 @@ class Week {
         console.log(this._users);
         console.log("creating users ");
         console.log(users);
-        //TODO sort by name
         return {
-            length: users.length,
-            next: function () {
-                i++;
+            [Symbol.iterator]() {
                 return {
-                    done: i > users.length,
-                    value: users[i - 1]
+                    next() {
+                        i++;
+                        return {
+                            done: i > users.length,
+                            value: users[i - 1]
+                        };
+                    }
                 }
-            },
-            [Symbol.iterator]: function () {
-                return this;
             }
         }
     }

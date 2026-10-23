@@ -1,22 +1,38 @@
 //class to handle a grid
+
+
+const colorClass = ["Y", "W", "G", "W", "P", "Br", "R", "Bl", "O"];
+const SQUARES = ["🟨", "⬜", "🟩", "⬛", "🟪", "🟫", "🟥", "🟦", "🟧"]
+
 class Grid {
 
     // @ts-ignore
     static SkipWords = window.skipWords ? window.skipWords : ["Turdle"];
-    static SQUARES = ["🟨", "⬜", "🟩", "⬛", "🟪", "🟫", "🟥", "🟦", "🟧"]
 
     /**
      * 
-     * @param {string} grid 
-     * @param {string | number} day 
+     * @param {string | DayStruct} grid 
+     * @param {string | number | null} day 
+     * @param {CommentResponse[]} comments
      */
-    constructor(grid, day = null) {
+    constructor(grid, day = null, comments = []) {
+        if (typeof grid != "string") {
+            day = grid.day;
+            comments = grid.comments || [];
+            grid = grid.grid;
+        }
         this._gridString = Grid.FIX(grid, day);
         this._score = Grid.PARSE_SCORE(this._gridString);
         this._wordleNum = Grid.PARSE_DAY(this._gridString);
         this._wordleWeek = Grid.WORDLE_WEEK(this._wordleNum);
         this._wordleDate = Grid.WORDLE_DATE(this._wordleNum);
         this._gridPix = Grid.CALC_WIDTH_PX(this._gridString);
+        this._comments = new GridComment(comments);
+
+        if (comments.length > 0)
+            console.log(`comments found in ${day}`, comments);
+        else
+            console.log(`no comments found on ${day}`)
     }
 
     gridPix() {
@@ -33,19 +49,27 @@ class Grid {
         }
 
         let r = gridLines.join("<BR>");
-        const colorClass = ["Y", "W", "G", "W", "P", "Br", "R", "Bl", "O"];
-        for (let i = 0; i < Grid.SQUARES.length; ++i)
-            r = r.replaceAll(Grid.SQUARES[i], Grid._squareBox(colorClass[i], Grid.SQUARES[i]))
+        for (let i = 0; i < SQUARES.length; ++i)
+            r = r.replaceAll(SQUARES[i], Grid._squareBox(colorClass[i], SQUARES[i]))
         r = r.replaceAll("⬛", "⬜");
+
+        r += this._comments.drawButton();
 
 
         return r;
     }
 
+    /**
+     * @param {string} colorClass
+     * @param {string} squareChar
+     */
     static _squareBox(colorClass, squareChar) {
         return `<span class = 'boxGeneric box${colorClass}'><span class = 'invisible'>${squareChar}</span></span>`;
     }
 
+    /**
+     * @param {number} score
+     */
     static DRAW_EMPTY(score, chars = ["⬜"]) {
         const fullLines = Math.floor(score);
         const partialLine = Math.floor((score - fullLines) * 5);
@@ -66,10 +90,12 @@ class Grid {
 
     /**
      * 
-     * @param {string} grid 
+     * @param {string | null} grid 
      * @returns 
      */
     static PARSE_SCORE(grid) {
+        if (grid == null)
+            return 0;
         if (grid.includes("\n"))
             grid = this.GET_STATS_LINE(grid);
         if (grid == null)
@@ -88,11 +114,13 @@ class Grid {
 
     /**
      * 
-     * @param {string} grid 
-     * @param {number} defaultDay 
+     * @param {string | null} grid 
+     * @param {number | null} defaultDay 
      * @returns 
      */
     static PARSE_DAY(grid, defaultDay = this.WORDLE_FROM_DATE()) {
+        if (grid == null)
+            return defaultDay;
         if (grid.includes("\n"))
             grid = this.GET_STATS_LINE(grid);
         if (grid == null)
@@ -117,7 +145,12 @@ class Grid {
     // @ts-ignore
     static TIMES_PER_DAY = window.timesPerDay != null ? window.timesPerDay : 1;
 
+    /**
+     * @param {number | null} wordleDay
+     */
     static WORDLE_DATE(wordleDay) {
+        if (wordleDay == null)
+            return new Date(this.START_DAY());
         const days = Math.floor((wordleDay - this._DAY) / this.TIMES_PER_DAY);
         const r = new Date(this.START_DAY());
         r.setDate(this.START_DAY().getDate() + days);
@@ -181,8 +214,12 @@ class Grid {
         return "<b>" + date.getDate() + " / " + this._month(date.getMonth()) + " / " + date.getFullYear() + "</b>";
     }
 
+    /**
+     * @param {string | number} val
+     */
     static _month(val) {
-        switch (parseInt(val)) {
+        const nVal = typeof val == "string" ? parseInt(val) : val;
+        switch (nVal) {
             case 0: return "JAN";
             case 1: return "FEB";
             case 2: return "MAR";
@@ -196,7 +233,7 @@ class Grid {
             case 10: return "NOV";
             case 11: return "DEC";
         }
-        return "" + (parseInt(val) + 1);
+        return "" + (nVal + 1);
     }
 
     static FILLER_WORD() {
@@ -206,7 +243,7 @@ class Grid {
     /**
      * Standardize formatting of the grid, remove promo text, etc
      * @param {string} grid 
-     * @param {number | string} day 
+     * @param {number | string | null} day 
      * @returns the grid with a proper date and score header
      */
     static FIX(grid, day = null) {
@@ -251,6 +288,9 @@ class Grid {
         return this.FILLER_WORD() + " " + day + " " + this.CALC_SCORE(grid) + "\n\n" + grid;
     }
 
+    /**
+     * @param {string} grid
+     */
     static GET_STATS_LINE(grid) {
         let g = grid.split("\n");
         for (const line of g) {
@@ -262,6 +302,9 @@ class Grid {
         return null;
     }
 
+    /**
+     * @param {string} grid
+     */
     static CALC_SCORE(grid) {
         let g = grid.split("\n");
         let score = 0;
@@ -275,8 +318,13 @@ class Grid {
         return score + "/6";
     }
 
+    /**
+     * @param {string} grid
+     */
     static CALC_WIDTH_PX(grid) {
         const len = this.DATA_LENGTH(grid);
+        if (!len)
+            return 0;
         return len * 26; //10 width + 1 margin on each side;
     }
 
@@ -304,7 +352,7 @@ class Grid {
                 for (; end >= 0; --end)
                     if (this.IS_SQUARE_CHAR(l, end)) {
                         let sub = l.substring(0, end + 1);
-                        for (const s of this.SQUARES) //squares vary in character length so replace all with a single character
+                        for (const s of SQUARES) //squares vary in character length so replace all with a single character
                             sub = sub.replaceAll(s, " ");
                         return sub.length;
                     }
@@ -319,7 +367,7 @@ class Grid {
      * @returns true if the character at the index is a square
      */
     static IS_SQUARE_CHAR(c, i) {
-        for (const s of this.SQUARES) {
+        for (const s of SQUARES) {
             if (c.includes(s, i))
                 return true;
         }
